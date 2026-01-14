@@ -34,7 +34,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         'longitude' => input('longitude'),
         'bankName' => input('bankName'),
         'bankAccountNumber' => input('bankAccountNumber'),
-        'bankAccountName' => input('bankAccountName')
+        'bankAccountName' => input('bankAccountName'),
+        'nik' => input('nik'),
+        'ownerName' => input('ownerName')
     ];
     
     $errors = validate($userData, [
@@ -43,6 +45,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         'phoneNumber' => 'required|phone',
         'password' => 'required|min:8'
     ]);
+    
+    // Validate Owner Info
+    if (empty($sellerData['nik'])) $errors['nik'] = 'NIK wajib diisi';
+    if (empty($sellerData['ownerName'])) $errors['ownerName'] = 'Nama pemilik wajib diisi';
     
     if (empty($sellerData['storeName'])) {
         $errors['storeName'] = 'Nama toko wajib diisi';
@@ -320,10 +326,40 @@ $pageTitle = 'Daftar Sebagai Penjual - WHFood';
                     
                     <hr class="border-gray-200 mb-8">
                     
-                    <!-- Section 2: Store Information -->
+                    <!-- Section 1.5: Owner Information -->
                     <div class="mb-8">
                         <h3 class="text-lg font-semibold text-gray-900 mb-6 flex items-center gap-2">
                             <span class="w-8 h-8 rounded-full bg-primary-100 text-primary-700 flex items-center justify-center text-sm font-bold">2</span>
+                            Informasi Pemilik
+                        </h3>
+                        
+                        <div class="grid md:grid-cols-2 gap-4">
+                            <div>
+                                <label for="nik" class="block text-sm font-medium text-gray-700 mb-2">
+                                    NIK <span class="text-red-500">*</span>
+                                </label>
+                                <input type="text" id="nik" name="nik" required
+                                       class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary-500 focus:outline-none input-focus-ring transition-all"
+                                       placeholder="Nomor Induk Kependudukan" maxlength="16" pattern="[0-9]{16}">
+                                <p class="text-xs text-gray-500 mt-1">Sesuai KTP (16 digit angka)</p>
+                            </div>
+                            <div>
+                                <label for="ownerName" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Nama Pemilik <span class="text-red-500">*</span>
+                                </label>
+                                <input type="text" id="ownerName" name="ownerName" required
+                                       class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary-500 focus:outline-none input-focus-ring transition-all"
+                                       placeholder="Nama lengkap sesuai KTP">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <hr class="border-gray-200 mb-8">
+                    
+                    <!-- Section 2: Store Information -->
+                    <div class="mb-8">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-6 flex items-center gap-2">
+                            <span class="w-8 h-8 rounded-full bg-primary-100 text-primary-700 flex items-center justify-center text-sm font-bold">3</span>
                             Informasi Toko
                         </h3>
                         
@@ -352,7 +388,7 @@ $pageTitle = 'Daftar Sebagai Penjual - WHFood';
                     <!-- Section 3: Location -->
                     <div class="mb-8">
                         <h3 class="text-lg font-semibold text-gray-900 mb-6 flex items-center gap-2">
-                            <span class="w-8 h-8 rounded-full bg-primary-100 text-primary-700 flex items-center justify-center text-sm font-bold">3</span>
+                            <span class="w-8 h-8 rounded-full bg-primary-100 text-primary-700 flex items-center justify-center text-sm font-bold">4</span>
                             Lokasi Toko
                         </h3>
                         
@@ -419,7 +455,7 @@ $pageTitle = 'Daftar Sebagai Penjual - WHFood';
                     <!-- Section 4: Bank Information -->
                     <div>
                         <h3 class="text-lg font-semibold text-gray-900 mb-6 flex items-center gap-2">
-                            <span class="w-8 h-8 rounded-full bg-primary-100 text-primary-700 flex items-center justify-center text-sm font-bold">4</span>
+                            <span class="w-8 h-8 rounded-full bg-primary-100 text-primary-700 flex items-center justify-center text-sm font-bold">5</span>
                             Informasi Pembayaran
                             <span class="text-xs font-normal text-gray-500">(Opsional)</span>
                         </h3>

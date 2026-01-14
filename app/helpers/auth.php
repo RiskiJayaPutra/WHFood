@@ -244,6 +244,8 @@ function registerSeller(array $userData, array $sellerData): array
             'storeDescription' => $sellerData['storeDescription'] ?? null,
             'storeLogo' => $sellerData['storeLogo'] ?? null,
             'storeBanner' => $sellerData['storeBanner'] ?? null,
+            'nik' => $sellerData['nik'] ?? null,
+            'ownerName' => $sellerData['ownerName'] ?? null,
             'address' => $sellerData['address'],
             'village' => $sellerData['village'] ?? 'Way Huwi',
             'district' => $sellerData['district'] ?? 'Jati Agung',

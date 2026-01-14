@@ -69,7 +69,7 @@ if ($tableExists) {
 
     $reviews = $db->select("
         SELECT r.*, 
-               p.name as productName, p.slug as productSlug, p.image as productImage,
+               p.name as productName, p.slug as productSlug, p.primaryImage as productImage,
                u.fullName as userName, u.email as userEmail
         FROM reviews r
         LEFT JOIN products p ON r.productId = p.id

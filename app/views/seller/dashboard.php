@@ -111,7 +111,7 @@ $pageTitle = 'Dashboard Penjual - WHFood';
                         <i data-lucide="star" class="w-6 h-6 text-yellow-600"></i>
                     </div>
                 </div>
-                <h3 class="text-3xl font-bold text-gray-900"><?= number_format($seller['rating'] ?? 0, 1) ?></h3>
+                <h3 class="text-3xl font-bold text-gray-900"><?= number_format((float)($seller['rating'] ?? 0), 1) ?></h3>
                 <p class="text-gray-500 text-sm">Rating (<?= $seller['totalReviews'] ?? 0 ?> ulasan)</p>
             </div>
             

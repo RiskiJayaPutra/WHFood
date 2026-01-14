@@ -39,34 +39,42 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $db = Database::getInstance();
         
         // Handle logo upload
-        if (isset($_FILES['storeLogo']) && $_FILES['storeLogo']['error'] === UPLOAD_ERR_OK) {
+        if (isset($_FILES['storeLogo']) && $_FILES['storeLogo']['error'] !== UPLOAD_ERR_NO_FILE) {
             $uploadResult = uploadFile($_FILES['storeLogo'], 'stores', 'logo');
             if ($uploadResult['success']) {
                 $data['storeLogo'] = $uploadResult['path'];
                 resizeImage($data['storeLogo'], 400, 400, 90);
+            } else {
+                $errors['storeLogo'] = $uploadResult['message'];
             }
         }
         
         // Handle banner upload
-        if (isset($_FILES['storeBanner']) && $_FILES['storeBanner']['error'] === UPLOAD_ERR_OK) {
+        if (isset($_FILES['storeBanner']) && $_FILES['storeBanner']['error'] !== UPLOAD_ERR_NO_FILE) {
             $uploadResult = uploadFile($_FILES['storeBanner'], 'stores', 'banner');
             if ($uploadResult['success']) {
                 $data['storeBanner'] = $uploadResult['path'];
                 resizeImage($data['storeBanner'], 1200, 400, 85);
+            } else {
+                $errors['storeBanner'] = $uploadResult['message'];
             }
         }
         
-        // Update seller profile
-        $db->update('seller_profiles', $data, 'id = ?', [$seller['id']]);
-        
-        // Update user phone if provided
-        $phone = input('phoneNumber');
-        if ($phone) {
-            $db->update('users', ['phoneNumber' => $phone], 'id = ?', [$currentUser['id']]);
+        if (!empty($errors)) {
+             flashError(array_values($errors)[0]);
+        } else {
+             // Update seller profile
+             $db->update('seller_profiles', $data, 'id = ?', [$seller['id']]);
+             
+             // Update user phone if provided
+             $phone = input('phoneNumber');
+             if ($phone) {
+                 $db->update('users', ['phoneNumber' => $phone], 'id = ?', [$currentUser['id']]);
+             }
+             
+             flashSuccess('Profil toko berhasil diperbarui');
+             redirect('seller/profil');
         }
-        
-        flashSuccess('Profil toko berhasil diperbarui');
-        redirect('seller/profil');
     } else {
         flashError(array_values($errors)[0]);
     }
