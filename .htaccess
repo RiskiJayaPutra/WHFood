@@ -1,0 +1,72 @@
+# ============================================================================
+# WHFood - Apache URL Rewriting Configuration
+# ============================================================================
+# 
+# File ini mengatur URL rewriting untuk mengarahkan semua request ke
+# public/index.php sebagai single entry point (Front Controller Pattern).
+#
+# @package     WHFood
+# @version     1.0.0
+# @since       2026-01-12
+# ============================================================================
+
+# Aktifkan Rewrite Engine
+RewriteEngine On
+
+# ----------------------------------------------------------------------------
+# Security Headers & Protection
+# ----------------------------------------------------------------------------
+
+# Cegah akses ke file sensitif
+<FilesMatch "^\.">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+
+# Cegah akses ke file konfigurasi dan source code
+<FilesMatch "\.(env|sql|md|git|htaccess|htpasswd|ini|log|sh|inc|bak|config)$">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+
+# Cegah directory browsing
+Options -Indexes
+
+# Cegah akses ke folder app (konfigurasi & core files)
+RewriteRule ^app/ - [F,L]
+
+# Cegah akses ke folder sql
+RewriteRule ^sql/ - [F,L]
+
+# ----------------------------------------------------------------------------
+# URL Rewriting Rules
+# ----------------------------------------------------------------------------
+
+# Kondisi: Jika request bukan file yang ada
+RewriteCond %{REQUEST_FILENAME} !-f
+
+# Kondisi: Jika request bukan direktori yang ada
+RewriteCond %{REQUEST_FILENAME} !-d
+
+# Redirect semua request ke public/index.php
+RewriteRule ^(.*)$ public/index.php [QSA,L]
+
+# ----------------------------------------------------------------------------
+# Performance & Caching (Optional)
+# ----------------------------------------------------------------------------
+
+# Aktifkan compression jika tersedia
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/html text/plain text/xml text/css
+    AddOutputFilterByType DEFLATE text/javascript application/javascript application/json
+</IfModule>
+
+# Set default charset
+AddDefaultCharset UTF-8
+
+# Prevent clickjacking
+<IfModule mod_headers.c>
+    Header always set X-Frame-Options "SAMEORIGIN"
+    Header always set X-Content-Type-Options "nosniff"
+    Header always set X-XSS-Protection "1; mode=block"
+</IfModule>

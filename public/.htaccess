@@ -1,0 +1,40 @@
+# ============================================================================
+# WHFood - Public Directory URL Rewriting
+# ============================================================================
+# 
+# File ini mengatur URL rewriting di dalam folder public.
+# Semua request yang bukan file/folder yang ada akan diarahkan ke index.php.
+#
+# @package     WHFood
+# @version     1.0.0
+# @since       2026-01-12
+# ============================================================================
+
+# Aktifkan Rewrite Engine
+RewriteEngine On
+
+# Set base URL (sesuaikan jika perlu)
+# RewriteBase /
+
+# ----------------------------------------------------------------------------
+# URL Rewriting Rules
+# ----------------------------------------------------------------------------
+
+# Kondisi: Jika request bukan file yang ada
+RewriteCond %{REQUEST_FILENAME} !-f
+
+# Kondisi: Jika request bukan direktori yang ada
+RewriteCond %{REQUEST_FILENAME} !-d
+
+# Redirect semua request ke index.php dengan query string
+RewriteRule ^(.*)$ index.php?url=$1 [QSA,L]
+
+# ----------------------------------------------------------------------------
+# Security
+# ----------------------------------------------------------------------------
+
+# Cegah akses ke file PHP lain kecuali index.php (opsional, uncomment jika perlu)
+# RewriteCond %{REQUEST_FILENAME} -f
+# RewriteCond %{REQUEST_URI} !^/index\.php$
+# RewriteCond %{REQUEST_URI} \.php$
+# RewriteRule .* - [F,L]

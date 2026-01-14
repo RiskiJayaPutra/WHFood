@@ -1,0 +1,148 @@
+/**
+ * ============================================================================
+ * WHFood - Smart Map Picker Styles
+ * ============================================================================
+ * Custom CSS untuk komponen Smart Map Picker
+ */
+
+/* Custom Marker Styling */
+.custom-map-marker {
+    background: transparent;
+    border: none;
+}
+
+.marker-pin {
+    width: 40px;
+    height: 50px;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.3));
+    animation: marker-bounce 0.5s ease-out;
+}
+
+.marker-icon {
+    width: 40px;
+    height: 50px;
+    color: #ef4444;
+    transition: transform 0.2s ease;
+}
+
+.marker-pin:hover .marker-icon {
+    transform: scale(1.1);
+}
+
+/* Marker bounce animation */
+@keyframes marker-bounce {
+    0% {
+        transform: translateY(-20px);
+        opacity: 0;
+    }
+    50% {
+        transform: translateY(5px);
+    }
+    100% {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+/* Notification animations */
+@keyframes slide-up {
+    from {
+        transform: translateY(20px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+@keyframes fade-out {
+    from {
+        opacity: 1;
+    }
+    to {
+        opacity: 0;
+    }
+}
+
+.animate-slide-up {
+    animation: slide-up 0.3s ease-out;
+}
+
+.animate-fade-out {
+    animation: fade-out 0.3s ease-out forwards;
+}
+
+/* Spinner animation */
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.animate-spin {
+    animation: spin 1s linear infinite;
+}
+
+/* Map container enhancements */
+.map-container {
+    position: relative;
+    overflow: hidden;
+}
+
+/* Leaflet popup customization */
+.leaflet-popup-content-wrapper {
+    border-radius: 12px;
+    padding: 4px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+}
+
+.leaflet-popup-content {
+    margin: 12px 16px;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.leaflet-popup-tip {
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+    .marker-pin {
+        width: 32px;
+        height: 40px;
+    }
+    
+    .marker-icon {
+        width: 32px;
+        height: 40px;
+    }
+    
+    .leaflet-popup-content {
+        font-size: 13px;
+    }
+}
+
+/* Premium glass effect for map overlay controls */
+.map-controls-overlay {
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+/* Touch-friendly improvements */
+@media (pointer: coarse) {
+    .leaflet-control-zoom a {
+        width: 40px !important;
+        height: 40px !important;
+        line-height: 40px !important;
+        font-size: 20px !important;
+    }
+}
