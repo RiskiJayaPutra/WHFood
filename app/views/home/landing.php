@@ -190,7 +190,7 @@ $pageDescription = 'Pesan makanan enak dari UMKM lokal Desa Way Huwi, Lampung Se
          HERO SECTION
          Premium hero with floating search bar, food images, and staggered text
          ======================================================================== -->
-    <section class="relative min-h-screen overflow-hidden">
+    <section class="relative min-h-screen">
         <!-- Background Image with Overlay -->
         <div class="absolute inset-0 z-0">
             <img src="https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=1920&q=80" 
