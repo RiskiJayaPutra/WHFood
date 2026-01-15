@@ -21,6 +21,9 @@ if ($search) {
     $where[] = "(p.name LIKE ? OR p.description LIKE ?)";
     $params[] = "%{$search}%";
     $params[] = "%{$search}%";
+    
+    // Track search for recommendations
+    trackSearch($search);
 }
 
 $whereClause = implode(' AND ', $where);

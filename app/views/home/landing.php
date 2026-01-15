@@ -26,6 +26,16 @@ $popularProducts = $db->select("
     LIMIT 8
 ");
 
+// Get personalized recommendations if user has activity
+$recommendations = [];
+$recentlyViewed = [];
+$hasActivity = hasUserActivity();
+
+if ($hasActivity) {
+    $recommendations = getRecommendedProducts(8);
+    $recentlyViewed = getRecentlyViewed(4);
+}
+
 $pageTitle = 'WHFood - Way Huwi Food Marketplace';
 $pageDescription = 'Pesan makanan enak dari UMKM lokal Desa Way Huwi, Lampung Selatan. Cepat, mudah, langsung via WhatsApp!';
 ?>
@@ -241,7 +251,7 @@ $pageDescription = 'Pesan makanan enak dari UMKM lokal Desa Way Huwi, Lampung Se
                 <div class="hidden md:flex items-center gap-8">
                     <a href="<?= url('produk') ?>" class="text-white/90 hover:text-white font-medium transition-colors">Menu</a>
                     <a href="<?= url('penjual') ?>" class="text-white/90 hover:text-white font-medium transition-colors">Penjual</a>
-                    <a href="#about" class="text-white/90 hover:text-white font-medium transition-colors">Tentang</a>
+                    <a href="<?= url('tentang') ?>" class="text-white/90 hover:text-white font-medium transition-colors">Tentang</a>
                 </div>
                 
                 <!-- CTA Buttons (Desktop) -->
@@ -290,7 +300,7 @@ $pageDescription = 'Pesan makanan enak dari UMKM lokal Desa Way Huwi, Lampung Se
             <div id="mobile-menu" class="hidden md:hidden absolute top-full left-0 right-0 bg-white border-t border-gray-100 shadow-xl p-4 flex flex-col gap-4 z-50">
                 <a href="<?= url('produk') ?>" class="text-gray-600 font-medium p-2 hover:bg-gray-50 rounded-lg">Menu</a>
                 <a href="<?= url('penjual') ?>" class="text-gray-600 font-medium p-2 hover:bg-gray-50 rounded-lg">Penjual</a>
-                <a href="#about" class="text-gray-600 font-medium p-2 hover:bg-gray-50 rounded-lg">Tentang</a>
+                <a href="<?= url('tentang') ?>" class="text-gray-600 font-medium p-2 hover:bg-gray-50 rounded-lg">Tentang</a>
                 <hr class="border-gray-100">
                 <?php if (isLoggedIn()): ?>
                     <?php if (isAdmin()): ?>
@@ -401,6 +411,86 @@ $pageDescription = 'Pesan makanan enak dari UMKM lokal Desa Way Huwi, Lampung Se
             </div>
         </div>
     </section>
+
+    <?php if ($hasActivity && (!empty($recentlyViewed) || !empty($recommendations))): ?>
+    <!-- ========================================================================
+         PERSONALIZED RECOMMENDATIONS
+         Based on user's search history and viewed products
+         ======================================================================== -->
+    <section class="py-16 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-primary-50 to-white">
+        <div class="max-w-7xl mx-auto">
+            
+            <?php if (!empty($recentlyViewed)): ?>
+            <!-- Recently Viewed -->
+            <div class="mb-12">
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="w-10 h-10 rounded-xl bg-primary-100 flex items-center justify-center">
+                        <i data-lucide="clock" class="w-5 h-5 text-primary-600"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-xl font-bold text-gray-900">Terakhir Dilihat</h2>
+                        <p class="text-sm text-gray-500">Produk yang baru saja Anda lihat</p>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <?php foreach ($recentlyViewed as $product): ?>
+                        <a href="<?= url('produk/' . $product['slug']) ?>" class="group bg-white rounded-xl shadow-sm hover:shadow-md transition-all overflow-hidden">
+                            <div class="aspect-square overflow-hidden">
+                                <img src="<?= uploadUrl($product['primaryImage']) ?>" alt="<?= e($product['name']) ?>" class="w-full h-full object-cover group-hover:scale-105 transition-transform">
+                            </div>
+                            <div class="p-3">
+                                <h3 class="font-semibold text-gray-900 text-sm truncate"><?= e($product['name']) ?></h3>
+                                <p class="text-primary-600 font-bold text-sm"><?= rupiah($product['discountPrice'] ?: $product['price']) ?></p>
+                            </div>
+                        </a>
+                    <?php endforeach; ?>
+                </div>
+            </div>
+            <?php endif; ?>
+            
+            <?php if (!empty($recommendations)): ?>
+            <!-- Recommended For You -->
+            <div>
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center">
+                        <i data-lucide="sparkles" class="w-5 h-5 text-amber-600"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-xl font-bold text-gray-900">Rekomendasi Untuk Anda</h2>
+                        <p class="text-sm text-gray-500">Berdasarkan aktivitas pencarian dan produk yang dilihat</p>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <?php foreach ($recommendations as $product): ?>
+                        <a href="<?= url('produk/' . $product['slug']) ?>" class="group bg-white rounded-xl shadow-sm hover:shadow-md transition-all overflow-hidden">
+                            <div class="aspect-square overflow-hidden relative">
+                                <img src="<?= uploadUrl($product['primaryImage']) ?>" alt="<?= e($product['name']) ?>" class="w-full h-full object-cover group-hover:scale-105 transition-transform">
+                                <?php if ($product['discountPercentage'] > 0): ?>
+                                    <div class="absolute top-2 right-2 px-2 py-0.5 bg-amber-500 text-white text-xs font-bold rounded">-<?= $product['discountPercentage'] ?>%</div>
+                                <?php endif; ?>
+                            </div>
+                            <div class="p-3">
+                                <h3 class="font-semibold text-gray-900 text-sm truncate"><?= e($product['name']) ?></h3>
+                                <p class="text-xs text-gray-500 truncate mb-1"><?= e($product['storeName']) ?></p>
+                                <div class="flex items-center justify-between">
+                                    <p class="text-primary-600 font-bold text-sm"><?= rupiah($product['discountPrice'] ?: $product['price']) ?></p>
+                                    <?php if ($product['rating'] > 0): ?>
+                                        <div class="flex items-center gap-1 text-xs text-amber-500">
+                                            <i data-lucide="star" class="w-3 h-3 fill-current"></i>
+                                            <?= number_format((float)$product['rating'], 1) ?>
+                                        </div>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
+                        </a>
+                    <?php endforeach; ?>
+                </div>
+            </div>
+            <?php endif; ?>
+            
+        </div>
+    </section>
+    <?php endif; ?>
 
     <!-- ========================================================================
          PRODUCT CARDS SECTION

@@ -54,7 +54,7 @@ if ($method === 'GET') {
         // Handle image uploads (max 2)
         $uploadedImages = [];
         if (!empty($_FILES['images']) && is_array($_FILES['images']['name'])) {
-            $fileCount = min(count($_FILES['images']['name']), 2); // Max 2 images
+        $fileCount = min(count($_FILES['images']['name']), 2);
             
             for ($i = 0; $i < $fileCount; $i++) {
                 if ($_FILES['images']['error'][$i] === UPLOAD_ERR_OK) {
@@ -110,9 +110,7 @@ if ($method === 'GET') {
             jsonSuccess('Review berhasil ditambahkan');
         }
     } catch (Exception $e) {
-        // Log error explicitly
-        file_put_contents(__DIR__ . '/../../public/api_error_log.txt', date('[Y-m-d H:i:s] ') . $e->getMessage() . PHP_EOL, FILE_APPEND);
-        jsonError('Database Error: ' . $e->getMessage());
+        jsonError('Terjadi kesalahan: ' . $e->getMessage());
     }
     
 } else {

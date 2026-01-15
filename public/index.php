@@ -27,6 +27,7 @@ require_once CONFIG_PATH . '/database.php';
 require_once HELPERS_PATH . '/functions.php';
 require_once HELPERS_PATH . '/auth.php';
 require_once HELPERS_PATH . '/upload.php';
+require_once HELPERS_PATH . '/recommendations.php';
 
 
 initSession();
@@ -102,6 +103,7 @@ $routes = [
     },
     'syarat-ketentuan' => 'public/terms.php',
     'kebijakan-privasi' => 'public/privacy.php',
+    'tentang' => 'public/about.php',
     
     
     'seller' => function($param1 = null) {

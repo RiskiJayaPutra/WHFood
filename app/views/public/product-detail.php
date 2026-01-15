@@ -38,6 +38,9 @@ $relatedProducts = $db->select("
 
 $db->update('products', ['viewCount' => $product['viewCount'] + 1], 'id = ?', [$product['id']]);
 
+// Track this product view for recommendations
+trackProductView((int)$product['id']);
+
 $pageTitle = $product['name'] . ' - WHFood';
 $discountedPrice = $product['discountPrice'] ? rupiah($product['discountPrice']) : rupiah($product['price']);
 $waMessage = urlencode("Halo, saya mau pesan *{$product['name']}* ({$discountedPrice})");

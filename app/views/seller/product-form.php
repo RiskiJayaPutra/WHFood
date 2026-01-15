@@ -389,25 +389,37 @@ $categories = [
                             
                             <!-- Unit -->
                             <div class="space-y-2">
-                                <label for="unit" class="block text-sm font-semibold text-gray-700">
+                                <label for="unitSelect" class="block text-sm font-semibold text-gray-700">
                                     Satuan Produk
                                 </label>
                                 <div class="relative">
                                     <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                                         <i data-lucide="scale" class="w-5 h-5 text-gray-400"></i>
                                     </div>
-                                    <input type="text" id="unit" name="unit" list="unit-suggestions"
-                                           value="<?= e(old('unit', $product['unit'] ?? 'porsi')) ?>"
-                                           class="w-full pl-12 pr-4 py-3 rounded-xl border border-gray-200 text-gray-900 focus:border-primary-500 focus:ring-2 focus:ring-primary-100 outline-none transition-all placeholder:text-gray-300 shadow-sm"
-                                           placeholder="porsi">
-                                    <datalist id="unit-suggestions">
-                                        <option value="porsi">
-                                        <option value="pcs">
-                                        <option value="box">
-                                        <option value="kg">
-                                        <option value="gram">
-                                    </datalist>
+                                    <select id="unitSelect" onchange="handleUnitChange(this)"
+                                            class="w-full pl-12 pr-4 py-3 rounded-xl border border-gray-200 text-gray-900 focus:border-primary-500 focus:ring-2 focus:ring-primary-100 outline-none transition-all shadow-sm appearance-none bg-white">
+                                        <?php 
+                                        $units = ['porsi', 'pcs', 'box', 'pack', 'bungkus', 'cup', 'gelas', 'botol', 'kg', 'gram', 'liter', 'ml'];
+                                        $currentUnit = old('unit', $product['unit'] ?? 'porsi');
+                                        $isCustom = !in_array($currentUnit, $units);
+                                        foreach ($units as $u): 
+                                        ?>
+                                            <option value="<?= $u ?>" <?= $currentUnit === $u ? 'selected' : '' ?>><?= ucfirst($u) ?></option>
+                                        <?php endforeach; ?>
+                                        <option value="lainnya" <?= $isCustom ? 'selected' : '' ?>>Lainnya...</option>
+                                    </select>
+                                    <div class="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none">
+                                        <i data-lucide="chevron-down" class="w-4 h-4 text-gray-400"></i>
+                                    </div>
                                 </div>
+                                <!-- Custom unit input -->
+                                <div id="customUnitWrapper" class="<?= $isCustom ? '' : 'hidden' ?>">
+                                    <input type="text" id="customUnit" 
+                                           value="<?= $isCustom ? e($currentUnit) : '' ?>"
+                                           class="w-full px-4 py-3 rounded-xl border border-gray-200 text-gray-900 focus:border-primary-500 focus:ring-2 focus:ring-primary-100 outline-none transition-all placeholder:text-gray-400 shadow-sm"
+                                           placeholder="Ketik satuan lainnya...">
+                                </div>
+                                <input type="hidden" id="unit" name="unit" value="<?= e($currentUnit) ?>">
                             </div>
                         </div>
                     </div>
@@ -581,6 +593,27 @@ $categories = [
     
     <script>
         lucide.createIcons();
+        
+        // Handle unit selection
+        function handleUnitChange(select) {
+            const customWrapper = document.getElementById('customUnitWrapper');
+            const customInput = document.getElementById('customUnit');
+            const hiddenInput = document.getElementById('unit');
+            
+            if (select.value === 'lainnya') {
+                customWrapper.classList.remove('hidden');
+                customInput.focus();
+                hiddenInput.value = customInput.value || '';
+            } else {
+                customWrapper.classList.add('hidden');
+                hiddenInput.value = select.value;
+            }
+        }
+        
+        // Update hidden unit field when custom input changes
+        document.getElementById('customUnit')?.addEventListener('input', function() {
+            document.getElementById('unit').value = this.value;
+        });
         
         function previewImage(input) {
             if (input.files && input.files[0]) {
