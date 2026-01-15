@@ -110,6 +110,7 @@ $routes = [
             'edit-produk' => 'seller/product-form.php',
             'pesanan' => 'seller/orders.php',
             'profil' => 'seller/profile.php',
+            'pembayaran' => 'seller/payment-settings.php',
             default => '404'
         };
     },
