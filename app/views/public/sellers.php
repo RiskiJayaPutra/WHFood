@@ -191,7 +191,7 @@ $pageTitle = 'Daftar Penjual - WHFood';
                                 <div class="flex items-center gap-4 mt-4 text-sm">
                                     <div class="flex items-center gap-1">
                                         <i data-lucide="star" class="w-4 h-4 text-accent-500 fill-accent-500"></i>
-                                        <span class="font-semibold"><?= number_format($seller['rating'], 1) ?></span>
+                                        <span class="font-semibold"><?= number_format((float)($seller['rating'] ?? 0), 1) ?></span>
                                     </div>
                                     <span class="text-gray-300">|</span>
                                     <span class="text-gray-500"><?= $seller['totalProducts'] ?> produk</span>
