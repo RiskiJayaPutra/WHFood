@@ -214,12 +214,12 @@ function clearOld(): void
 /**
  * Sanitize string untuk output HTML
  * 
- * @param string|null $value String untuk di-sanitize
+ * @param mixed $value String untuk di-sanitize
  * @return string Sanitized string
  */
-function e(?string $value): string
+function e(mixed $value): string
 {
-    return htmlspecialchars($value ?? '', ENT_QUOTES, 'UTF-8');
+    return htmlspecialchars((string)($value ?? ''), ENT_QUOTES, 'UTF-8');
 }
 
 /**
@@ -300,9 +300,9 @@ function validate(array $data, array $rules): array
  * @param int|float $amount Jumlah uang
  * @return string Format Rupiah
  */
-function rupiah(int|float $amount): string
+function rupiah(string|int|float $amount): string
 {
-    return 'Rp' . number_format($amount, 0, ',', '.');
+    return 'Rp' . number_format((float)$amount, 0, ',', '.');
 }
 
 /**

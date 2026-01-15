@@ -282,5 +282,17 @@ function uploadUrl(?string $path, string $default = ''): string
         return $path;
     }
     
-    return url($path);
+    // Fix for localhost processing assets from root public folder
+    $protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http';
+    $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
+    $rootUrl = "{$protocol}://{$host}";
+    
+    // Compatibility for running from root folder (php -S localhost:8000)
+    // If accessing from root, we need to point to public/assets
+    $isPublicDir = basename($_SERVER['DOCUMENT_ROOT']) === 'public';
+    if (!$isPublicDir && !str_starts_with($path, 'public/')) {
+        return $rootUrl . '/public/' . ltrim($path, '/');
+    }
+    
+    return $rootUrl . '/' . ltrim($path, '/');
 }

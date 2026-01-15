@@ -25,6 +25,8 @@ if (!$product) {
     exit;
 }
 
+$gallery = $db->select("SELECT * FROM product_images WHERE productId = ?", [$product['id']]);
+
 $relatedProducts = $db->select("
     SELECT p.*, sp.storeName
     FROM products p
@@ -105,11 +107,29 @@ $waLink = "https://wa.me/{$product['sellerPhone']}?text={$waMessage}";
             
             <!-- Product Image -->
             <div class="space-y-4">
-                <div class="aspect-square rounded-2xl overflow-hidden bg-white shadow-sm">
-                    <img src="<?= uploadUrl($product['primaryImage']) ?>" 
+                <div class="aspect-square rounded-2xl overflow-hidden bg-white shadow-sm border border-gray-100">
+                    <img id="mainImage" src="<?= uploadUrl($product['primaryImage']) ?>" 
                          alt="<?= e($product['name']) ?>"
-                         class="w-full h-full object-cover">
+                         class="w-full h-full object-cover transition-all duration-300">
                 </div>
+                
+                <!-- Gallery Thumbnails -->
+                <?php if (!empty($gallery)): ?>
+                    <div class="grid grid-cols-5 gap-2">
+                        <!-- Primary options -->
+                        <div class="aspect-square rounded-lg overflow-hidden border-2 border-primary-500 cursor-pointer p-0.5 thumbnail active"
+                             onclick="changeImage('<?= uploadUrl($product['primaryImage']) ?>', this)">
+                            <img src="<?= uploadUrl($product['primaryImage']) ?>" class="w-full h-full object-cover rounded-md">
+                        </div>
+                        
+                        <?php foreach ($gallery as $img): ?>
+                            <div class="aspect-square rounded-lg overflow-hidden border-2 border-transparent hover:border-primary-300 cursor-pointer p-0.5 thumbnail"
+                                 onclick="changeImage('<?= uploadUrl($img['imagePath']) ?>', this)">
+                                <img src="<?= uploadUrl($img['imagePath']) ?>" class="w-full h-full object-cover rounded-md">
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+                <?php endif; ?>
                 
                 <!-- Additional images would go here -->
             </div>
@@ -439,6 +459,28 @@ $waLink = "https://wa.me/{$product['sellerPhone']}?text={$waMessage}";
                     btn.textContent = 'Kirim Ulasan';
                 }
             });
+        }
+                }
+            });
+        }
+        
+        // Gallery Interaction
+        function changeImage(src, thumbnail) {
+            // Update main image
+            const mainImg = document.getElementById('mainImage');
+            mainImg.style.opacity = '0';
+            setTimeout(() => {
+                mainImg.src = src;
+                mainImg.style.opacity = '1';
+            }, 200);
+            
+            // Update thumbnail styles
+            document.querySelectorAll('.thumbnail').forEach(el => {
+                el.classList.remove('border-primary-500');
+                el.classList.add('border-transparent');
+            });
+            thumbnail.classList.remove('border-transparent');
+            thumbnail.classList.add('border-primary-500');
         }
     </script>
 </body>
