@@ -180,8 +180,8 @@ $pageTitle = 'Daftar - WHFood';
                     <input type="checkbox" id="terms" name="terms" required
                            class="mt-1 w-4 h-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500">
                     <label for="terms" class="text-sm text-gray-600">
-                        Saya setuju dengan <a href="#" class="text-primary-600 hover:underline">Syarat & Ketentuan</a>
-                        dan <a href="#" class="text-primary-600 hover:underline">Kebijakan Privasi</a>
+                        Saya setuju dengan <a href="<?= url('syarat-ketentuan') ?>" target="_blank" class="text-primary-600 hover:underline">Syarat & Ketentuan</a>
+                        dan <a href="<?= url('kebijakan-privasi') ?>" target="_blank" class="text-primary-600 hover:underline">Kebijakan Privasi</a>
                     </label>
                 </div>
                 

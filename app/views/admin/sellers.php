@@ -45,7 +45,8 @@ if ($filter === 'pending') {
 } elseif ($filter === 'verified') {
     $whereClause .= " AND sp.isVerified = 1";
 } elseif ($filter === 'unverified') {
-    $whereClause .= " AND sp.isVerified = 0 AND u.status = 'active'";
+    // Show all unverified sellers (Active but unverified OR Pending)
+    $whereClause .= " AND (sp.isVerified = 0 OR sp.isVerified IS NULL OR u.status = 'pending')";
 }
 
 $sellers = $db->select("
@@ -94,7 +95,7 @@ $pageTitle = 'Kelola Penjual - Admin WHFood';
     
     <?php require VIEWS_PATH . '/components/admin-sidebar.php'; ?>
     
-    <main class="ml-64 p-8">
+    <main class="transition-all duration-300 md:ml-64 p-4 md:p-8">
         <div class="flex items-center justify-between mb-8">
             <div>
                 <h1 class="text-2xl font-bold text-gray-900">Kelola Penjual</h1>

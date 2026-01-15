@@ -68,7 +68,7 @@ $pageTitle = 'Admin Dashboard - WHFood';
     
     <?php require VIEWS_PATH . '/components/admin-sidebar.php'; ?>
     
-    <main class="ml-64 p-8">
+    <main class="transition-all duration-300 md:ml-64 p-4 md:p-8">
         <div class="mb-8">
             <h1 class="text-2xl font-bold text-gray-900">Dashboard Admin</h1>
             <p class="text-gray-500">Selamat datang di panel administrasi WHFood</p>

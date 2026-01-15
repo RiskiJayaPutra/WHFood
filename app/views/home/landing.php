@@ -1,20 +1,30 @@
 <?php
 
-/**
- * ============================================================================
- * WHFood - Premium Landing Page
- * ============================================================================
- * 
- * Landing page visual-heavy dengan design setara Grab/Gofood.
- * Menggunakan Food Psychology untuk memicu rasa lapar pengunjung.
- * 
- * @package     WHFood
- * @author      WHFood Development Team
- * @version     1.0.0
- * @since       2026-01-12
- */
+
 
 declare(strict_types=1);
+
+$db = Database::getInstance();
+
+
+$stats = $db->select("
+    SELECT 
+        (SELECT COUNT(*) FROM seller_profiles WHERE isVerified = 1) as countSellers,
+        (SELECT COUNT(*) FROM products WHERE status = 'active') as countMenus,
+        (SELECT COALESCE(SUM(totalSold), 0) FROM products) as sumSales,
+        (SELECT COALESCE(AVG(rating), 0) FROM products WHERE status = 'active') as avgRatingScore
+")[0];
+
+
+$popularProducts = $db->select("
+    SELECT p.*, s.storeName, s.storeSlug, s.isVerified, u.fullName as ownerName
+    FROM products p
+    JOIN seller_profiles s ON p.sellerId = s.id
+    JOIN users u ON s.userId = u.id
+    WHERE p.status = 'active'
+    ORDER BY p.rating DESC, p.totalSold DESC
+    LIMIT 8
+");
 
 $pageTitle = 'WHFood - Way Huwi Food Marketplace';
 $pageDescription = 'Pesan makanan enak dari UMKM lokal Desa Way Huwi, Lampung Selatan. Cepat, mudah, langsung via WhatsApp!';
@@ -229,28 +239,28 @@ $pageDescription = 'Pesan makanan enak dari UMKM lokal Desa Way Huwi, Lampung Se
                 
                 <!-- Nav Links -->
                 <div class="hidden md:flex items-center gap-8">
-                    <a href="#menu" class="text-white/90 hover:text-white font-medium transition-colors">Menu</a>
-                    <a href="#sellers" class="text-white/90 hover:text-white font-medium transition-colors">Penjual</a>
+                    <a href="<?= url('produk') ?>" class="text-white/90 hover:text-white font-medium transition-colors">Menu</a>
+                    <a href="<?= url('penjual') ?>" class="text-white/90 hover:text-white font-medium transition-colors">Penjual</a>
                     <a href="#about" class="text-white/90 hover:text-white font-medium transition-colors">Tentang</a>
                 </div>
                 
-                <!-- CTA Buttons -->
-                <div class="flex items-center gap-3">
+                <!-- CTA Buttons (Desktop) -->
+                <div class="hidden md:flex items-center gap-3">
                     <?php if (isLoggedIn()): ?>
                         <?php $currentUser = user(); ?>
-                        <div class="hidden sm:flex items-center gap-3 text-white/90 font-medium mr-2">
+                        <div class="flex items-center gap-3 text-white/90 font-medium mr-2">
                             <span>Hai, <?= e(explode(' ', $currentUser['fullName'])[0]) ?></span>
                         </div>
                         
                         <?php if (isAdmin()): ?>
                             <a href="<?= url('admin/dashboard') ?>" 
                                class="px-5 py-2.5 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all">
-                                Admin Panel
+                                Admin
                             </a>
                         <?php elseif (isSeller()): ?>
                             <a href="<?= url('seller/dashboard') ?>" 
                                class="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all">
-                                Dashboard Toko
+                                Toko
                             </a>
                         <?php endif; ?>
                         
@@ -259,15 +269,40 @@ $pageDescription = 'Pesan makanan enak dari UMKM lokal Desa Way Huwi, Lampung Se
                             Keluar
                         </a>
                     <?php else: ?>
-                        <a href="<?= url('masuk') ?>" class="hidden sm:inline-flex text-white/90 hover:text-white font-medium transition-colors">
+                        <a href="<?= url('masuk') ?>" class="text-white/90 hover:text-white font-medium transition-colors">
                             Masuk
                         </a>
                         <a href="<?= url('daftar-penjual') ?>" 
                            class="px-5 py-2.5 bg-accent-500 hover:bg-accent-600 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all">
-                            Jual Makanan
+                            Daftar
                         </a>
                     <?php endif; ?>
                 </div>
+
+                <!-- Mobile Menu Button -->
+                <button onclick="document.getElementById('mobile-menu').classList.toggle('hidden')" 
+                        class="md:hidden p-2 text-white hover:bg-white/10 rounded-lg transition-colors">
+                    <i data-lucide="menu" class="w-6 h-6"></i>
+                </button>
+            </div>
+
+            <!-- Mobile Menu Dropdown -->
+            <div id="mobile-menu" class="hidden md:hidden absolute top-full left-0 right-0 bg-white border-t border-gray-100 shadow-xl p-4 flex flex-col gap-4 z-50">
+                <a href="<?= url('produk') ?>" class="text-gray-600 font-medium p-2 hover:bg-gray-50 rounded-lg">Menu</a>
+                <a href="<?= url('penjual') ?>" class="text-gray-600 font-medium p-2 hover:bg-gray-50 rounded-lg">Penjual</a>
+                <a href="#about" class="text-gray-600 font-medium p-2 hover:bg-gray-50 rounded-lg">Tentang</a>
+                <hr class="border-gray-100">
+                <?php if (isLoggedIn()): ?>
+                    <?php if (isAdmin()): ?>
+                        <a href="<?= url('admin/dashboard') ?>" class="text-primary-600 font-semibold p-2">Dashboard Admin</a>
+                    <?php elseif (isSeller()): ?>
+                        <a href="<?= url('seller/dashboard') ?>" class="text-primary-600 font-semibold p-2">Dashboard Toko</a>
+                    <?php endif; ?>
+                    <a href="<?= url('keluar') ?>" class="text-red-600 font-medium p-2">Keluar</a>
+                <?php else: ?>
+                    <a href="<?= url('masuk') ?>" class="text-primary-600 font-medium p-2">Masuk</a>
+                    <a href="<?= url('daftar-penjual') ?>" class="bg-accent-500 text-white font-bold p-3 text-center rounded-xl">Daftar Jadi Penjual</a>
+                <?php endif; ?>
             </div>
         </nav>
         
@@ -303,31 +338,32 @@ $pageDescription = 'Pesan makanan enak dari UMKM lokal Desa Way Huwi, Lampung Se
                 
                 <!-- Floating Search Bar -->
                 <div class="max-w-2xl mx-auto stagger-5" data-aos="fade-up" data-aos-delay="500">
-                    <div class="relative glass rounded-2xl shadow-2xl p-2">
-                        <div class="flex items-center gap-2">
+                    <form action="<?= url('produk') ?>" method="GET" class="relative glass rounded-2xl shadow-2xl p-2">
+                        <div class="flex items-center gap-1 sm:gap-2">
                             <!-- Search Icon -->
-                            <div class="pl-4 text-gray-400">
+                            <div class="pl-2 sm:pl-4 text-gray-400 flex-shrink-0">
                                 <i data-lucide="search" class="w-5 h-5"></i>
                             </div>
                             
                             <!-- Search Input -->
-                            <input type="text" 
-                                   placeholder="Cari makanan atau warung favorit..." 
-                                   class="flex-1 px-4 py-4 bg-transparent text-gray-800 placeholder-gray-400 focus:outline-none text-lg">
+                            <input type="text" name="cari"
+                                   placeholder="Cari makanan..." 
+                                   class="flex-1 min-w-0 px-2 sm:px-4 py-3 sm:py-4 bg-transparent text-gray-800 placeholder-gray-400 focus:outline-none text-base sm:text-lg">
                             
                             <!-- Location Button -->
-                            <button class="hidden sm:flex items-center gap-2 px-4 py-2 text-gray-500 hover:text-primary-600 transition-colors border-l border-gray-200">
+                            <button type="button" class="hidden md:flex items-center gap-2 px-4 py-2 text-gray-500 hover:text-primary-600 transition-colors border-l border-gray-200 flex-shrink-0">
                                 <i data-lucide="map-pin" class="w-5 h-5"></i>
                                 <span class="font-medium">Way Huwi</span>
                             </button>
                             
                             <!-- Search Button -->
-                            <button class="px-6 py-4 bg-primary-600 hover:bg-primary-700 text-white font-semibold rounded-xl transition-all flex items-center gap-2">
+                            <button type="submit" class="flex-shrink-0 px-4 sm:px-6 py-3 sm:py-4 bg-primary-600 hover:bg-primary-700 text-white font-semibold rounded-xl transition-all flex items-center gap-2">
+                                <i data-lucide="search" class="w-5 h-5 sm:hidden"></i>
                                 <span class="hidden sm:inline">Cari</span>
-                                <i data-lucide="arrow-right" class="w-5 h-5"></i>
+                                <i data-lucide="arrow-right" class="w-5 h-5 hidden sm:block"></i>
                             </button>
                         </div>
-                    </div>
+                    </form>
                     
                     <!-- Popular Searches -->
                     <div class="flex flex-wrap items-center justify-center gap-2 mt-6">
@@ -346,19 +382,19 @@ $pageDescription = 'Pesan makanan enak dari UMKM lokal Desa Way Huwi, Lampung Se
             <div class="max-w-5xl mx-auto px-4 transform translate-y-1/2">
                 <div class="glass rounded-2xl shadow-xl p-6 md:p-8 grid grid-cols-2 md:grid-cols-4 gap-6">
                     <div class="text-center" data-aos="fade-up" data-aos-delay="100">
-                        <div class="text-3xl md:text-4xl font-bold text-primary-600">50+</div>
+                        <div class="text-3xl md:text-4xl font-bold text-primary-600"><?= number_format($stats['countSellers']) ?>+</div>
                         <div class="text-gray-500 text-sm mt-1">UMKM Terdaftar</div>
                     </div>
                     <div class="text-center" data-aos="fade-up" data-aos-delay="200">
-                        <div class="text-3xl md:text-4xl font-bold text-primary-600">200+</div>
+                        <div class="text-3xl md:text-4xl font-bold text-primary-600"><?= number_format($stats['countMenus']) ?>+</div>
                         <div class="text-gray-500 text-sm mt-1">Menu Tersedia</div>
                     </div>
                     <div class="text-center" data-aos="fade-up" data-aos-delay="300">
-                        <div class="text-3xl md:text-4xl font-bold text-primary-600">1000+</div>
+                        <div class="text-3xl md:text-4xl font-bold text-primary-600"><?= number_format((float)$stats['sumSales']) ?>+</div>
                         <div class="text-gray-500 text-sm mt-1">Pesanan Sukses</div>
                     </div>
                     <div class="text-center" data-aos="fade-up" data-aos-delay="400">
-                        <div class="text-3xl md:text-4xl font-bold text-accent-600">4.8</div>
+                        <div class="text-3xl md:text-4xl font-bold text-accent-600"><?= number_format((float)$stats['avgRatingScore'], 1) ?></div>
                         <div class="text-gray-500 text-sm mt-1">Rating Rata-rata</div>
                     </div>
                 </div>
@@ -388,281 +424,278 @@ $pageDescription = 'Pesan makanan enak dari UMKM lokal Desa Way Huwi, Lampung Se
             
             <!-- Category Tabs -->
             <div class="flex flex-wrap justify-center gap-3 mb-10" data-aos="fade-up" data-aos-delay="100">
-                <button class="px-5 py-2.5 bg-primary-600 text-white font-semibold rounded-xl transition-all">
+                <button onclick="loadPopularProducts('all', this)" class="category-tab active px-5 py-2.5 bg-primary-600 text-white font-semibold rounded-xl transition-all inline-block hover:bg-primary-700 shadow-lg shadow-primary-600/20">
                     Semua
                 </button>
-                <button class="px-5 py-2.5 bg-white hover:bg-gray-100 text-gray-700 font-medium rounded-xl border border-gray-200 transition-all">
+                <button onclick="loadPopularProducts('makanan_berat', this)" class="category-tab px-5 py-2.5 bg-white text-gray-700 font-medium rounded-xl border border-gray-200 transition-all inline-block hover:bg-gray-50 hover:border-gray-300">
                     Makanan Berat
                 </button>
-                <button class="px-5 py-2.5 bg-white hover:bg-gray-100 text-gray-700 font-medium rounded-xl border border-gray-200 transition-all">
+                <button onclick="loadPopularProducts('makanan_ringan', this)" class="category-tab px-5 py-2.5 bg-white text-gray-700 font-medium rounded-xl border border-gray-200 transition-all inline-block hover:bg-gray-50 hover:border-gray-300">
                     Snack
                 </button>
-                <button class="px-5 py-2.5 bg-white hover:bg-gray-100 text-gray-700 font-medium rounded-xl border border-gray-200 transition-all">
+                <button onclick="loadPopularProducts('minuman', this)" class="category-tab px-5 py-2.5 bg-white text-gray-700 font-medium rounded-xl border border-gray-200 transition-all inline-block hover:bg-gray-50 hover:border-gray-300">
                     Minuman
                 </button>
-                <button class="px-5 py-2.5 bg-white hover:bg-gray-100 text-gray-700 font-medium rounded-xl border border-gray-200 transition-all">
+                <button onclick="loadPopularProducts('dessert', this)" class="category-tab px-5 py-2.5 bg-white text-gray-700 font-medium rounded-xl border border-gray-200 transition-all inline-block hover:bg-gray-50 hover:border-gray-300">
                     Dessert
                 </button>
             </div>
             
             <!-- Product Cards Grid -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                
-                <!-- ============================================
-                     PRODUCT CARD COMPONENT - VERIFIED SELLER
-                     ============================================ -->
-                <article class="group bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden transform hover:scale-105"
-                         data-aos="fade-up" data-aos-delay="100">
-                    <!-- Image Container -->
-                    <div class="relative food-img-container aspect-square overflow-hidden">
-                        <img src="https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=400&q=80" 
-                             alt="Nasi Uduk Komplit" 
-                             class="food-img w-full h-full object-cover">
-                        
-                        <!-- Gradient Overlay -->
-                        <div class="absolute inset-0 food-gradient opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                        
-                        <!-- Verified Badge -->
-                        <div class="badge-verified absolute top-3 left-3 flex items-center gap-1.5 px-3 py-1.5 bg-primary-600 text-white text-xs font-semibold rounded-full shadow-lg">
-                            <i data-lucide="badge-check" class="w-3.5 h-3.5"></i>
-                            Terverifikasi
-                        </div>
-                        
-                        <!-- Discount Badge (Optional) -->
-                        <div class="absolute top-3 right-3 px-2.5 py-1 bg-accent-500 text-white text-xs font-bold rounded-lg shadow-lg">
-                            -20%
-                        </div>
-                        
-                        <!-- Quick Action - Favorite -->
-                        <button class="absolute bottom-3 right-3 w-10 h-10 bg-white/90 hover:bg-white rounded-full flex items-center justify-center shadow-lg opacity-0 group-hover:opacity-100 transition-all transform translate-y-2 group-hover:translate-y-0">
-                            <i data-lucide="heart" class="w-5 h-5 text-gray-600 hover:text-red-500 transition-colors"></i>
-                        </button>
+            <div id="popular-products-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                <?php if (empty($popularProducts)): ?>
+                    <div class="col-span-full text-center py-20">
+                        <i data-lucide="package-open" class="w-16 h-16 text-gray-300 mx-auto mb-4"></i>
+                        <h3 class="text-lg font-semibold text-gray-900">Belum ada menu tersedia</h3>
+                        <p class="text-gray-500">Silakan cek kembali nanti atau daftar sebagai penjual!</p>
                     </div>
-                    
-                    <!-- Card Content -->
-                    <div class="p-5">
-                        <!-- Seller Info -->
-                        <div class="flex items-center gap-2 mb-3">
-                            <img src="https://ui-avatars.com/api/?name=Bu+Dewi&background=059669&color=fff&size=32" 
-                                 alt="Bu Dewi" 
-                                 class="w-6 h-6 rounded-full">
-                            <span class="text-sm text-gray-500">Warung Bu Dewi</span>
-                            <div class="flex items-center gap-1 ml-auto">
-                                <i data-lucide="star" class="w-4 h-4 text-accent-500 fill-accent-500"></i>
-                                <span class="text-sm font-medium text-gray-700">4.9</span>
-                            </div>
-                        </div>
-                        
-                        <!-- Product Name -->
-                        <h3 class="font-bold text-gray-900 text-lg mb-2 line-clamp-2 group-hover:text-primary-600 transition-colors">
-                            Nasi Uduk Komplit
-                        </h3>
-                        
-                        <!-- Product Description -->
-                        <p class="text-gray-500 text-sm mb-4 line-clamp-2">
-                            Nasi uduk gurih dengan ayam goreng renyah, tempe orek, dan sambal pedas
-                        </p>
-                        
-                        <!-- Price & CTA -->
-                        <div class="flex items-end justify-between">
-                            <div>
-                                <span class="text-xs text-gray-400 line-through">Rp18.000</span>
-                                <div class="text-xl font-bold text-primary-600">Rp15.000</div>
+                <?php else: ?>
+                    <?php foreach ($popularProducts as $index => $product): ?>
+                        <article class="group bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden transform hover:scale-105"
+                                 data-aos="fade-up" data-aos-delay="<?= ($index % 4) * 100 ?>">
+                            
+                            <!-- Image Container -->
+                            <div class="relative food-img-container aspect-square overflow-hidden">
+                                <?php if ($product['primaryImage']): ?>
+                                    <img src="<?= uploadUrl($product['primaryImage']) ?>" 
+                                         alt="<?= e($product['name']) ?>" 
+                                         class="food-img w-full h-full object-cover <?= $product['stock'] <= 0 ? 'grayscale-[30%]' : '' ?>">
+                                <?php else: ?>
+                                    <div class="w-full h-full bg-gray-200 flex items-center justify-center">
+                                        <i data-lucide="image" class="w-12 h-12 text-gray-400"></i>
+                                    </div>
+                                <?php endif; ?>
+                                
+                                <div class="absolute inset-0 food-gradient opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                                
+                                <!-- Verified Badge -->
+                                <?php if ($product['isVerified']): ?>
+                                    <div class="badge-verified absolute top-3 left-3 flex items-center gap-1.5 px-3 py-1.5 bg-primary-600 text-white text-xs font-semibold rounded-full shadow-lg">
+                                        <i data-lucide="badge-check" class="w-3.5 h-3.5"></i>
+                                        Terverifikasi
+                                    </div>
+                                <?php endif; ?>
+                                
+                                <!-- Discount Badge -->
+                                <?php if ($product['discountPercentage'] > 0): ?>
+                                    <div class="absolute top-3 right-3 px-2.5 py-1 bg-accent-500 text-white text-xs font-bold rounded-lg shadow-lg">
+                                        -<?= $product['discountPercentage'] ?>%
+                                    </div>
+                                <?php endif; ?>
+
+                                <!-- Sold Out Overlay -->
+                                <?php if ($product['stock'] <= 0): ?>
+                                    <div class="absolute inset-0 bg-black/40 flex items-center justify-center">
+                                        <span class="px-6 py-3 bg-gray-900/80 text-white font-bold text-lg rounded-xl">
+                                            HABIS
+                                        </span>
+                                    </div>
+                                <?php endif; ?>
+                                
+                                <!-- Quick Action -->
+                                <button class="absolute bottom-3 right-3 w-10 h-10 bg-white/90 hover:bg-white rounded-full flex items-center justify-center shadow-lg opacity-0 group-hover:opacity-100 transition-all transform translate-y-2 group-hover:translate-y-0">
+                                    <i data-lucide="heart" class="w-5 h-5 text-gray-600 hover:text-red-500 transition-colors"></i>
+                                </button>
                             </div>
                             
-                            <!-- WhatsApp Order Button -->
-                            <a href="https://wa.me/6281234567890?text=Halo,%20saya%20mau%20pesan%20Nasi%20Uduk%20Komplit" 
-                               target="_blank"
-                               class="whatsapp-btn flex items-center gap-2 px-4 py-2.5 text-white font-semibold rounded-xl">
-                                <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
-                                    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
-                                </svg>
-                                <span class="hidden sm:inline">Pesan</span>
-                            </a>
-                        </div>
-                    </div>
-                </article>
-                
-                <!-- ============================================
-                     PRODUCT CARD COMPONENT - REGULAR SELLER
-                     ============================================ -->
-                <article class="group bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden transform hover:scale-105"
-                         data-aos="fade-up" data-aos-delay="200">
-                    <div class="relative food-img-container aspect-square overflow-hidden">
-                        <img src="https://images.unsplash.com/photo-1626804475297-41608ea09aeb?w=400&q=80" 
-                             alt="Ayam Geprek" 
-                             class="food-img w-full h-full object-cover">
-                        <div class="absolute inset-0 food-gradient opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                        
-                        <!-- Best Seller Badge -->
-                        <div class="absolute top-3 left-3 flex items-center gap-1.5 px-3 py-1.5 bg-accent-500 text-white text-xs font-semibold rounded-full shadow-lg">
-                            <i data-lucide="flame" class="w-3.5 h-3.5"></i>
-                            Best Seller
-                        </div>
-                        
-                        <button class="absolute bottom-3 right-3 w-10 h-10 bg-white/90 hover:bg-white rounded-full flex items-center justify-center shadow-lg opacity-0 group-hover:opacity-100 transition-all transform translate-y-2 group-hover:translate-y-0">
-                            <i data-lucide="heart" class="w-5 h-5 text-gray-600 hover:text-red-500 transition-colors"></i>
-                        </button>
-                    </div>
-                    
-                    <div class="p-5">
-                        <div class="flex items-center gap-2 mb-3">
-                            <img src="https://ui-avatars.com/api/?name=Geprek+Mantap&background=d97706&color=fff&size=32" 
-                                 alt="Geprek Mantap" 
-                                 class="w-6 h-6 rounded-full">
-                            <span class="text-sm text-gray-500">Geprek Mantap</span>
-                            <div class="flex items-center gap-1 ml-auto">
-                                <i data-lucide="star" class="w-4 h-4 text-accent-500 fill-accent-500"></i>
-                                <span class="text-sm font-medium text-gray-700">4.8</span>
+                            <!-- Card Content -->
+                            <div class="p-5 <?= $product['stock'] <= 0 ? 'opacity-60' : '' ?>">
+                                <!-- Seller Info -->
+                                <div class="flex items-center gap-2 mb-3">
+                                    <div class="w-6 h-6 rounded-full bg-primary-100 flex items-center justify-center text-xs font-bold text-primary-700">
+                                        <?= mb_substr($product['storeName'], 0, 1) ?>
+                                    </div>
+                                    <span class="text-sm text-gray-500 truncate max-w-[120px]"><?= e($product['storeName']) ?></span>
+                                    <div class="flex items-center gap-1 ml-auto">
+                                        <i data-lucide="star" class="w-4 h-4 text-accent-500 fill-accent-500"></i>
+                                        <span class="text-sm font-medium text-gray-700"><?= number_format((float)$product['rating'], 1) ?></span>
+                                    </div>
+                                </div>
+                                
+                                <!-- Product Name -->
+                                <h3 class="font-bold text-gray-900 text-lg mb-2 line-clamp-2 group-hover:text-primary-600 transition-colors">
+                                    <a href="<?= url('produk/' . $product['slug']) ?>">
+                                        <?= e($product['name']) ?>
+                                    </a>
+                                </h3>
+                                
+                                <!-- Description -->
+                                <p class="text-gray-500 text-sm mb-4 line-clamp-2">
+                                    <?= e($product['description']) ?>
+                                </p>
+                                
+                                <!-- Price & CTA -->
+                                <div class="flex items-end justify-between">
+                                    <div>
+                                        <?php if ($product['discountPrice']): ?>
+                                            <span class="text-xs text-gray-400 line-through">Rp<?= number_format((float)$product['price'], 0, ',', '.') ?></span>
+                                            <div class="text-xl font-bold text-primary-600">Rp<?= number_format((float)$product['discountPrice'], 0, ',', '.') ?></div>
+                                        <?php else: ?>
+                                            <div class="text-xl font-bold text-primary-600">Rp<?= number_format((float)$product['price'], 0, ',', '.') ?></div>
+                                        <?php endif; ?>
+                                    </div>
+                                    
+                                    <?php if ($product['stock'] > 0): ?>
+                                        <a href="https://wa.me/<?= e($product['phoneNumber'] ?? '6281234567890') ?>?text=Halo,%20saya%20mau%20pesan%20<?= urlencode($product['name']) ?>..." 
+                                           target="_blank"
+                                           class="whatsapp-btn flex items-center gap-2 px-4 py-2.5 text-white font-semibold rounded-xl">
+                                            <i data-lucide="message-circle" class="w-5 h-5"></i>
+                                            <span class="hidden sm:inline">Pesan</span>
+                                        </a>
+                                    <?php else: ?>
+                                        <button disabled class="flex items-center gap-2 px-4 py-2.5 bg-gray-300 text-gray-500 font-semibold rounded-xl cursor-not-allowed">
+                                            <i data-lucide="clock" class="w-5 h-5"></i>
+                                            <span class="hidden sm:inline">Habis</span>
+                                        </button>
+                                    <?php endif; ?>
+                                </div>
                             </div>
-                        </div>
-                        
-                        <h3 class="font-bold text-gray-900 text-lg mb-2 line-clamp-2 group-hover:text-primary-600 transition-colors">
-                            Ayam Geprek Level 5
-                        </h3>
-                        
-                        <p class="text-gray-500 text-sm mb-4 line-clamp-2">
-                            Ayam geprek super pedas dengan sambal level 5 dan nasi hangat
-                        </p>
-                        
-                        <div class="flex items-end justify-between">
-                            <div class="text-xl font-bold text-primary-600">Rp17.000</div>
-                            
-                            <a href="https://wa.me/6281234567890?text=Halo,%20saya%20mau%20pesan%20Ayam%20Geprek" 
-                               target="_blank"
-                               class="whatsapp-btn flex items-center gap-2 px-4 py-2.5 text-white font-semibold rounded-xl">
-                                <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
-                                    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
-                                </svg>
-                                <span class="hidden sm:inline">Pesan</span>
-                            </a>
-                        </div>
-                    </div>
-                </article>
-                
-                <!-- ============================================
-                     PRODUCT CARD - VERIFIED + NEW
-                     ============================================ -->
-                <article class="group bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden transform hover:scale-105"
-                         data-aos="fade-up" data-aos-delay="300">
-                    <div class="relative food-img-container aspect-square overflow-hidden">
-                        <img src="https://images.unsplash.com/photo-1544145945-f90425340c7e?w=400&q=80" 
-                             alt="Es Kopi Susu" 
-                             class="food-img w-full h-full object-cover">
-                        <div class="absolute inset-0 food-gradient opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                        
-                        <div class="badge-verified absolute top-3 left-3 flex items-center gap-1.5 px-3 py-1.5 bg-primary-600 text-white text-xs font-semibold rounded-full shadow-lg">
-                            <i data-lucide="badge-check" class="w-3.5 h-3.5"></i>
-                            Terverifikasi
-                        </div>
-                        
-                        <div class="absolute top-3 right-3 px-2.5 py-1 bg-blue-500 text-white text-xs font-bold rounded-lg shadow-lg">
-                            BARU
-                        </div>
-                        
-                        <button class="absolute bottom-3 right-3 w-10 h-10 bg-white/90 hover:bg-white rounded-full flex items-center justify-center shadow-lg opacity-0 group-hover:opacity-100 transition-all transform translate-y-2 group-hover:translate-y-0">
-                            <i data-lucide="heart" class="w-5 h-5 text-gray-600 hover:text-red-500 transition-colors"></i>
-                        </button>
-                    </div>
-                    
-                    <div class="p-5">
-                        <div class="flex items-center gap-2 mb-3">
-                            <img src="https://ui-avatars.com/api/?name=Kopi+Nusantara&background=059669&color=fff&size=32" 
-                                 alt="Kopi Nusantara" 
-                                 class="w-6 h-6 rounded-full">
-                            <span class="text-sm text-gray-500">Kopi Nusantara</span>
-                            <div class="flex items-center gap-1 ml-auto">
-                                <i data-lucide="star" class="w-4 h-4 text-accent-500 fill-accent-500"></i>
-                                <span class="text-sm font-medium text-gray-700">5.0</span>
-                            </div>
-                        </div>
-                        
-                        <h3 class="font-bold text-gray-900 text-lg mb-2 line-clamp-2 group-hover:text-primary-600 transition-colors">
-                            Es Kopi Susu Gula Aren
-                        </h3>
-                        
-                        <p class="text-gray-500 text-sm mb-4 line-clamp-2">
-                            Kopi robusta pilihan dengan susu segar dan gula aren asli
-                        </p>
-                        
-                        <div class="flex items-end justify-between">
-                            <div class="text-xl font-bold text-primary-600">Rp12.000</div>
-                            
-                            <a href="https://wa.me/6281234567890?text=Halo,%20saya%20mau%20pesan%20Es%20Kopi%20Susu" 
-                               target="_blank"
-                               class="whatsapp-btn flex items-center gap-2 px-4 py-2.5 text-white font-semibold rounded-xl">
-                                <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
-                                    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
-                                </svg>
-                                <span class="hidden sm:inline">Pesan</span>
-                            </a>
-                        </div>
-                    </div>
-                </article>
-                
-                <!-- ============================================
-                     PRODUCT CARD - SOLD OUT STATE
-                     ============================================ -->
-                <article class="group bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden transform hover:scale-105"
-                         data-aos="fade-up" data-aos-delay="400">
-                    <div class="relative food-img-container aspect-square overflow-hidden">
-                        <img src="https://images.unsplash.com/photo-1565299543923-37dd37887442?w=400&q=80" 
-                             alt="Martabak Manis" 
-                             class="food-img w-full h-full object-cover grayscale-[30%]">
-                        <div class="absolute inset-0 bg-black/40"></div>
-                        
-                        <!-- Sold Out Overlay -->
-                        <div class="absolute inset-0 flex items-center justify-center">
-                            <span class="px-6 py-3 bg-gray-900/80 text-white font-bold text-lg rounded-xl">
-                                HABIS
-                            </span>
-                        </div>
-                    </div>
-                    
-                    <div class="p-5 opacity-60">
-                        <div class="flex items-center gap-2 mb-3">
-                            <img src="https://ui-avatars.com/api/?name=Martabak+99&background=6b7280&color=fff&size=32" 
-                                 alt="Martabak 99" 
-                                 class="w-6 h-6 rounded-full">
-                            <span class="text-sm text-gray-500">Martabak 99</span>
-                            <div class="flex items-center gap-1 ml-auto">
-                                <i data-lucide="star" class="w-4 h-4 text-accent-500 fill-accent-500"></i>
-                                <span class="text-sm font-medium text-gray-700">4.7</span>
-                            </div>
-                        </div>
-                        
-                        <h3 class="font-bold text-gray-900 text-lg mb-2 line-clamp-2">
-                            Martabak Manis Special
-                        </h3>
-                        
-                        <p class="text-gray-500 text-sm mb-4 line-clamp-2">
-                            Martabak tebal dengan coklat, keju, kacang, dan susu
-                        </p>
-                        
-                        <div class="flex items-end justify-between">
-                            <div class="text-xl font-bold text-gray-400">Rp35.000</div>
-                            
-                            <button disabled 
-                                    class="flex items-center gap-2 px-4 py-2.5 bg-gray-300 text-gray-500 font-semibold rounded-xl cursor-not-allowed">
-                                <i data-lucide="clock" class="w-5 h-5"></i>
-                                <span class="hidden sm:inline">Habis</span>
-                            </button>
-                        </div>
-                    </div>
-                </article>
-                
-            </div>
-            
-            <!-- View All Button -->
-            <div class="text-center mt-12" data-aos="fade-up">
-                <a href="/menu" 
-                   class="inline-flex items-center gap-2 px-8 py-4 bg-white hover:bg-gray-50 text-gray-800 font-semibold rounded-xl border-2 border-gray-200 hover:border-primary-300 transition-all shadow-sm hover:shadow-md">
+                        </article>
+                    <?php endforeach; ?>
+                <?php endif; ?>
+            </div> <!-- End Grid -->
+
+            <!-- Load More Button -->
+            <div class="mt-12 text-center" data-aos="fade-up">
+                <a id="btn-load-more" href="<?= url('produk') ?>" class="inline-flex items-center gap-2 px-8 py-3 bg-white border-2 border-primary-600 text-primary-600 font-bold rounded-xl hover:bg-primary-50 transition-all group">
                     Lihat Semua Menu
-                    <i data-lucide="arrow-right" class="w-5 h-5"></i>
+                    <i data-lucide="arrow-right" class="w-5 h-5 group-hover:translate-x-1 transition-transform"></i>
                 </a>
             </div>
         </div>
     </section>
+
+    <script>
+    const BASE_URL = '<?= url('') ?>';
+
+    async function loadPopularProducts(category, btn) {
+        // Update tabs UI
+        if (btn) {
+            // Reset all tabs to inactive state
+            document.querySelectorAll('.category-tab').forEach(el => {
+                el.classList.remove('bg-primary-600', 'text-white', 'shadow-lg', 'shadow-primary-600/20', 'hover:bg-primary-700', 'font-semibold');
+                el.classList.add('bg-white', 'text-gray-700', 'border', 'border-gray-200', 'hover:bg-gray-50', 'hover:border-gray-300', 'font-medium');
+            });
+            
+            // Set clicked tab to active state
+            btn.classList.remove('bg-white', 'text-gray-700', 'border', 'border-gray-200', 'hover:bg-gray-50', 'hover:border-gray-300', 'font-medium');
+            btn.classList.add('bg-primary-600', 'text-white', 'shadow-lg', 'shadow-primary-600/20', 'hover:bg-primary-700', 'font-semibold');
+        }
+
+        const grid = document.getElementById('popular-products-grid');
+        const loadMoreBtn = document.getElementById('btn-load-more');
+        
+        // Show loading state
+        grid.style.opacity = '0.5';
+        
+        try {
+            const response = await fetch(`${BASE_URL}/api/products-popular?category=${category}`);
+            const result = await response.json();
+            
+            if (result.success) {
+                grid.innerHTML = result.data.products.map(product => renderProductCard(product)).join('');
+                
+                // Re-initialize Lucide icons for new content
+                lucide.createIcons();
+                
+                // Update "Lihat Semua" link
+                const query = category === 'all' ? '' : `?kategori=${category}`;
+                loadMoreBtn.href = `${BASE_URL}/produk${query}`;
+            }
+        } catch (error) {
+            console.error('Error loading products:', error);
+        } finally {
+            grid.style.opacity = '1';
+        }
+    }
+
+    function renderProductCard(p) {
+        // Safe check for numeric values
+        const price = parseFloat(p.price);
+        const discountPrice = p.discountPrice ? parseFloat(p.discountPrice) : null;
+        
+        const discountBadge = discountPrice 
+            ? `<span class="absolute top-3 right-3 px-2 py-1 bg-red-500 text-white text-xs font-bold rounded-lg shadow-lg">-${calculateDiscount(price, discountPrice)}%</span>` 
+            : '';
+            
+        const priceHtml = discountPrice
+            ? `<div class="flex flex-col">
+                 <span class="text-xs text-gray-400 line-through">Rp ${new Intl.NumberFormat('id-ID').format(price)}</span>
+                 <span class="text-lg font-bold text-primary-600">Rp ${new Intl.NumberFormat('id-ID').format(discountPrice)}</span>
+               </div>`
+            : `<span class="text-lg font-bold text-primary-600">Rp ${new Intl.NumberFormat('id-ID').format(price)}</span>`;
+
+        const verifiedBadge = p.sellerVerified
+            ? `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-badge-check w-3 h-3 text-primary-500 ml-1"><path d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.78 4.78 4 4 0 0 1-6.74 0 4 4 0 0 1-4.78-4.78 4 4 0 0 1 0-6.74Z"/><path d="m9 12 2 2 4-4"/></svg>`
+            : '';
+
+        const storeInitial = p.storeName ? p.storeName.charAt(0).toUpperCase() : 'T';
+        // Handle images stored with 'storage/' prefix or bare path
+        const isUrl = p.primaryImage && (p.primaryImage.startsWith('http') || p.primaryImage.startsWith('data:'));
+        const imageUrl = isUrl ? p.primaryImage : (p.primaryImage ? `<?= uploadUrl('') ?>${p.primaryImage}` : 'https://placehold.co/400x300?text=No+Image');
+
+        // Function e() equivalent for JS
+        const escapeHtml = (unsafe) => {
+            return unsafe
+                 .replace(/&/g, "&amp;")
+                 .replace(/</g, "&lt;")
+                 .replace(/>/g, "&gt;")
+                 .replace(/"/g, "&quot;")
+                 .replace(/'/g, "&#039;");
+        }
+
+        const phoneNumber = p.phoneNumber || '6281234567890';
+        const msg = encodeURIComponent(`Halo, saya mau pesan ${p.name}...`);
+
+        return `
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group">
+                <div class="relative aspect-[4/3] overflow-hidden">
+                    <img src="${imageUrl}" alt="${escapeHtml(p.name)}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+                    <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                        <a href="${BASE_URL}/produk/${p.slug}" class="px-6 py-2 bg-white text-gray-900 font-semibold rounded-full transform translate-y-4 group-hover:translate-y-0 transition-all duration-300">
+                            Lihat Detail
+                        </a>
+                    </div>
+                    ${discountBadge}
+                </div>
+                
+                <div class="p-5 ${p.stock <= 0 ? 'opacity-60' : ''}">
+                    <!-- Seller Info -->
+                    <div class="flex items-center gap-2 mb-3">
+                        <div class="w-6 h-6 rounded-full bg-primary-100 flex items-center justify-center text-xs font-bold text-primary-700">
+                            ${storeInitial}
+                        </div>
+                        <span class="text-sm text-gray-500 truncate max-w-[120px]">${escapeHtml(p.storeName)}</span>
+                        ${verifiedBadge}
+                        <div class="flex items-center gap-1 ml-auto">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-star w-3 h-3 text-yellow-400 fill-yellow-400"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                            <span class="text-xs font-bold text-gray-700">${p.avgRating}</span>
+                        </div>
+                    </div>
+                    
+                    <h3 class="font-bold text-gray-900 mb-1 line-clamp-1 group-hover:text-primary-600 transition-colors">
+                        ${escapeHtml(p.name)}
+                    </h3>
+                    <p class="text-sm text-gray-500 mb-4 line-clamp-2">${escapeHtml(p.description || '')}</p>
+                    
+                    <div class="flex items-center justify-between mt-auto">
+                        ${priceHtml}
+                        ${p.stock > 0 
+                            ? `<a href="https://wa.me/${phoneNumber}?text=${msg}" target="_blank" class="p-2 bg-primary-50 text-primary-600 rounded-xl hover:bg-primary-600 hover:text-white transition-colors">
+                                 <span class="text-xs font-bold px-2">Pesan</span>
+                               </a>`
+                            : `<button disabled class="px-3 py-1 bg-gray-100 text-gray-400 text-xs font-bold rounded-lg cursor-not-allowed">Habis</button>`
+                        }
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    function calculateDiscount(original, final) {
+        return Math.round(((original - final) / original) * 100);
+    }
+    </script>
 
     <!-- ========================================================================
          CTA SECTION
@@ -728,10 +761,10 @@ $pageDescription = 'Pesan makanan enak dari UMKM lokal Desa Way Huwi, Lampung Se
                 <div>
                     <h4 class="font-semibold mb-4">Menu</h4>
                     <ul class="space-y-3 text-gray-400">
-                        <li><a href="#" class="hover:text-white transition-colors">Semua Menu</a></li>
-                        <li><a href="#" class="hover:text-white transition-colors">Makanan Berat</a></li>
-                        <li><a href="#" class="hover:text-white transition-colors">Snack & Jajanan</a></li>
-                        <li><a href="#" class="hover:text-white transition-colors">Minuman</a></li>
+                        <li><a href="<?= url('produk') ?>" class="hover:text-white transition-colors">Semua Menu</a></li>
+                        <li><a href="<?= url('produk?kategori=makanan_berat') ?>" class="hover:text-white transition-colors">Makanan Berat</a></li>
+                        <li><a href="<?= url('produk?kategori=makanan_ringan') ?>" class="hover:text-white transition-colors">Snack & Jajanan</a></li>
+                        <li><a href="<?= url('produk?kategori=minuman') ?>" class="hover:text-white transition-colors">Minuman</a></li>
                     </ul>
                 </div>
                 

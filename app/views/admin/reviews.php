@@ -124,7 +124,7 @@ $pageTitle = 'Kelola Ulasan - Admin WHFood';
     
     <?php require VIEWS_PATH . '/components/admin-sidebar.php'; ?>
     
-    <main class="ml-64 p-8">
+    <main class="transition-all duration-300 md:ml-64 p-4 md:p-8">
         <!-- Header -->
         <div class="flex items-center justify-between mb-8">
             <div>

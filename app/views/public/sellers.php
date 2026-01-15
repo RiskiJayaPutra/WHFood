@@ -3,11 +3,11 @@ declare(strict_types=1);
 
 $db = Database::getInstance();
 
-// Filters
+
 $search = input('cari');
 $filter = input('filter') ?: 'semua';
 
-// Build query
+
 $where = ["sp.isVerified = 1", "u.status = 'active'"];
 $params = [];
 
@@ -26,7 +26,7 @@ $orderBy = match ($filter) {
     default => 'sp.createdAt DESC'
 };
 
-// Get sellers
+
 $sellers = $db->select("
     SELECT sp.*, u.phoneNumber, u.fullName as ownerName
     FROM seller_profiles sp

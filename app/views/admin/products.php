@@ -104,7 +104,7 @@ $pageTitle = 'Kelola Produk - Admin WHFood';
     
     <?php require VIEWS_PATH . '/components/admin-sidebar.php'; ?>
     
-    <main class="ml-64 p-8">
+    <main class="transition-all duration-300 md:ml-64 p-4 md:p-8">
         <!-- Header -->
         <div class="flex items-center justify-between mb-8">
             <div>
@@ -211,8 +211,8 @@ $pageTitle = 'Kelola Produk - Admin WHFood';
                             <tr class="hover:bg-gray-50 transition-colors">
                                 <td class="px-6 py-4">
                                     <div class="flex items-center gap-3">
-                                        <?php if ($product['image']): ?>
-                                            <img src="<?= e($product['image']) ?>" alt="" class="w-12 h-12 object-cover rounded-lg">
+                                        <?php if (!empty($product['primaryImage'])): ?>
+                                            <img src="<?= uploadUrl($product['primaryImage']) ?>" alt="" class="w-12 h-12 object-cover rounded-lg">
                                         <?php else: ?>
                                             <div class="w-12 h-12 bg-gray-200 rounded-lg flex items-center justify-center">
                                                 <i data-lucide="image" class="w-5 h-5 text-gray-400"></i>
@@ -228,12 +228,12 @@ $pageTitle = 'Kelola Produk - Admin WHFood';
                                     <p class="text-sm text-gray-900"><?= e($product['storeName'] ?? '-') ?></p>
                                 </td>
                                 <td class="px-6 py-4">
-                                    <p class="text-sm font-medium text-gray-900">Rp <?= number_format($product['price'], 0, ',', '.') ?></p>
+                                    <p class="text-sm font-medium text-gray-900">Rp <?= number_format((float)$product['price'], 0, ',', '.') ?></p>
                                 </td>
                                 <td class="px-6 py-4">
                                     <div class="flex items-center gap-1">
                                         <i data-lucide="star" class="w-4 h-4 text-yellow-500 fill-yellow-500"></i>
-                                        <span class="text-sm text-gray-900"><?= number_format($product['rating'] ?? 0, 1) ?></span>
+                                        <span class="text-sm text-gray-900"><?= number_format((float)($product['rating'] ?? 0), 1) ?></span>
                                         <span class="text-xs text-gray-500">(<?= $product['totalReviews'] ?? 0 ?>)</span>
                                     </div>
                                 </td>

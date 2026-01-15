@@ -78,9 +78,143 @@ $waLink = "https://wa.me/{$product['sellerPhone']}?text={$waMessage}";
         body { font-family: 'Plus Jakarta Sans', sans-serif; }
         .whatsapp-btn { background: linear-gradient(135deg, #25D366 0%, #128C7E 100%); }
         .whatsapp-btn:hover { box-shadow: 0 10px 25px rgba(37, 211, 102, 0.3); }
+        
+        /* Toast Notification System */
+        .toast-container {
+            position: fixed;
+            top: 24px;
+            right: 24px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            pointer-events: none;
+        }
+        
+        .toast {
+            pointer-events: auto;
+            min-width: 320px;
+            max-width: 420px;
+            padding: 16px 20px;
+            border-radius: 16px;
+            backdrop-filter: blur(20px);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.15), 0 0 0 1px rgba(255,255,255,0.1) inset;
+            display: flex;
+            align-items: flex-start;
+            gap: 14px;
+            transform: translateX(120%);
+            opacity: 0;
+            animation: toastSlideIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .toast.leaving {
+            animation: toastSlideOut 0.4s cubic-bezier(0.55, 0, 1, 0.45) forwards;
+        }
+        
+        .toast-success {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.95) 0%, rgba(5, 150, 105, 0.95) 100%);
+            color: white;
+        }
+        
+        .toast-error {
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.95) 0%, rgba(185, 28, 28, 0.95) 100%);
+            color: white;
+        }
+        
+        .toast-icon {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.25);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        
+        .toast-icon svg {
+            width: 16px;
+            height: 16px;
+        }
+        
+        .toast-content {
+            flex: 1;
+            padding-top: 2px;
+        }
+        
+        .toast-title {
+            font-weight: 700;
+            font-size: 15px;
+            margin-bottom: 4px;
+            letter-spacing: -0.01em;
+        }
+        
+        .toast-message {
+            font-size: 13px;
+            opacity: 0.9;
+            line-height: 1.4;
+        }
+        
+        .toast-close {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            transition: background 0.2s;
+            flex-shrink: 0;
+        }
+        
+        .toast-close:hover {
+            background: rgba(255,255,255,0.35);
+        }
+        
+        .toast-progress {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            height: 3px;
+            background: rgba(255,255,255,0.4);
+            animation: toastProgress 4s linear forwards;
+        }
+        
+        @keyframes toastSlideIn {
+            0% { transform: translateX(120%); opacity: 0; }
+            100% { transform: translateX(0); opacity: 1; }
+        }
+        
+        @keyframes toastSlideOut {
+            0% { transform: translateX(0) scale(1); opacity: 1; }
+            100% { transform: translateX(40px) scale(0.9); opacity: 0; }
+        }
+        
+        @keyframes toastProgress {
+            0% { width: 100%; }
+            100% { width: 0%; }
+        }
+        
+        @keyframes iconPop {
+            0% { transform: scale(0); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+        
+        .toast-icon svg {
+            animation: iconPop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) 0.2s both;
+        }
     </style>
 </head>
 <body class="bg-gray-50 min-h-screen">
+    
+    <!-- Toast Container -->
+    <div id="toastContainer" class="toast-container"></div>
     
     <header class="bg-white border-b border-gray-100 sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -135,57 +269,73 @@ $waLink = "https://wa.me/{$product['sellerPhone']}?text={$waMessage}";
             </div>
             
             <!-- Product Info -->
-            <div class="space-y-6">
-                <!-- Badges -->
-                <div class="flex flex-wrap gap-2">
+            <!-- Product Info -->
+            <div class="space-y-8">
+                <!-- Badges & Category -->
+                <div class="flex flex-wrap items-center gap-2">
                     <?php if ($product['sellerVerified']): ?>
-                        <span class="inline-flex items-center gap-1 px-3 py-1 bg-primary-100 text-primary-700 text-sm font-medium rounded-full">
-                            <i data-lucide="badge-check" class="w-4 h-4"></i>
-                            Penjual Terverifikasi
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-50 text-emerald-700 text-xs font-bold uppercase tracking-wider rounded-lg border border-emerald-100">
+                            <i data-lucide="badge-check" class="w-4 h-4 text-emerald-600"></i>
+                            Verified
                         </span>
                     <?php endif; ?>
                     
-                    <span class="inline-flex items-center gap-1 px-3 py-1 bg-gray-100 text-gray-700 text-sm font-medium rounded-full">
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-gray-100 text-gray-600 text-xs font-bold uppercase tracking-wider rounded-lg border border-gray-200">
                         <?= ucfirst(str_replace('_', ' ', $product['category'])) ?>
                     </span>
                     
                     <?php if ($product['discountPrice']): ?>
-                        <span class="inline-flex items-center px-3 py-1 bg-accent-100 text-accent-700 text-sm font-bold rounded-full">
-                            Diskon <?= $product['discountPercentage'] ?>%
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-rose-50 text-rose-600 text-xs font-bold uppercase tracking-wider rounded-lg border border-rose-100 animate-pulse">
+                            Hemat <?= $product['discountPercentage'] ?>%
                         </span>
                     <?php endif; ?>
                 </div>
                 
-                <!-- Title -->
-                <h1 class="text-3xl font-bold text-gray-900"><?= e($product['name']) ?></h1>
-                
-                <!-- Rating & Stats -->
-                <div class="flex items-center gap-4 text-sm">
-                    <div class="flex items-center gap-1">
-                        <i data-lucide="star" class="w-5 h-5 text-accent-500 fill-accent-500"></i>
-                        <span class="font-semibold"><?= number_format($product['rating'], 1) ?></span>
-                        <span class="text-gray-400">(<?= $product['totalReviews'] ?> ulasan)</span>
+                <!-- Title & Rating -->
+                <div>
+                    <h1 class="text-3xl md:text-4xl font-extrabold text-gray-900 leading-tight mb-4">
+                        <?= e($product['name']) ?>
+                    </h1>
+                    
+                    <div class="flex items-center gap-4 text-sm">
+                        <div class="flex items-center gap-1 bg-yellow-50 px-2.5 py-1.5 rounded-lg border border-yellow-100">
+                            <i data-lucide="star" class="w-4 h-4 text-yellow-500 fill-yellow-500"></i>
+                            <span class="font-bold text-gray-900"><?= number_format((float)$product['rating'], 1) ?></span>
+                            <span class="text-gray-500">/ 5.0</span>
+                        </div>
+                        <span class="text-gray-300">|</span>
+                        <span class="text-gray-500 font-medium">
+                            <?= number_format($product['totalSold']) ?> Terjual
+                        </span>
+                        <span class="text-gray-300">|</span>
+                        <span class="text-gray-500 font-medium">
+                            <?= number_format($product['viewCount']) ?>x Dilihat
+                        </span>
                     </div>
-                    <span class="text-gray-300">|</span>
-                    <span class="text-gray-500"><?= $product['totalSold'] ?> terjual</span>
-                    <span class="text-gray-300">|</span>
-                    <span class="text-gray-500"><?= $product['viewCount'] ?>x dilihat</span>
                 </div>
                 
                 <!-- Price -->
-                <div class="py-4 border-y border-gray-100">
+                <div class="p-6 bg-gray-50 rounded-2xl border border-gray-100">
                     <?php if ($product['discountPrice']): ?>
-                        <div class="flex items-center gap-3">
-                            <span class="text-xl text-gray-400 line-through"><?= rupiah($product['price']) ?></span>
-                            <span class="px-2 py-0.5 bg-accent-500 text-white text-sm font-bold rounded">
-                                -<?= $product['discountPercentage'] ?>%
+                        <div class="flex items-center gap-3 mb-1">
+                            <span class="text-lg text-gray-400 line-through decoration-red-400 decoration-2">
+                                <?= rupiah($product['price']) ?>
                             </span>
                         </div>
-                        <div class="text-4xl font-bold text-primary-600 mt-1"><?= rupiah($product['discountPrice']) ?></div>
+                        <div class="flex items-baseline gap-1">
+                            <span class="text-4xl font-extrabold text-primary-600">
+                                <?= rupiah($product['discountPrice']) ?>
+                            </span>
+                            <span class="text-gray-500 font-medium">/ <?= e($product['unit']) ?></span>
+                        </div>
                     <?php else: ?>
-                        <div class="text-4xl font-bold text-primary-600"><?= rupiah($product['price']) ?></div>
+                        <div class="flex items-baseline gap-1">
+                            <span class="text-4xl font-extrabold text-primary-600">
+                                <?= rupiah($product['price']) ?>
+                            </span>
+                            <span class="text-gray-500 font-medium">/ <?= e($product['unit']) ?></span>
+                        </div>
                     <?php endif; ?>
-                    <p class="text-gray-500 mt-1">per <?= e($product['unit']) ?></p>
                 </div>
                 
                 <!-- Description -->
@@ -238,8 +388,8 @@ $waLink = "https://wa.me/{$product['sellerPhone']}?text={$waMessage}";
                             </div>
                             <div class="flex items-center gap-3 text-sm text-gray-500 mt-1">
                                 <span class="flex items-center gap-1">
-                                    <i data-lucide="star" class="w-4 h-4 text-accent-500"></i>
-                                    <?= number_format($product['sellerRating'], 1) ?>
+                                    <i data-lucide="star" class="w-4 h-4 text-yellow-500 fill-yellow-500"></i>
+                                    <?= number_format((float)$product['sellerRating'], 1) ?>
                                 </span>
                                 <span><?= $product['sellerTotalProducts'] ?> produk</span>
                             </div>
@@ -258,10 +408,10 @@ $waLink = "https://wa.me/{$product['sellerPhone']}?text={$waMessage}";
                 <div class="flex items-center gap-2">
                     <div class="flex items-center gap-1">
                         <?php for ($i = 1; $i <= 5; $i++): ?>
-                            <i data-lucide="star" class="w-5 h-5 <?= $i <= round($product['rating']) ? 'fill-accent-500 text-accent-500' : 'text-gray-300' ?>"></i>
+                            <i data-lucide="star" class="w-5 h-5 <?= $i <= round((float)$product['rating']) ? 'fill-yellow-500 text-yellow-500' : 'text-gray-300' ?>"></i>
                         <?php endfor; ?>
                     </div>
-                    <span class="font-semibold text-gray-900"><?= number_format($product['rating'], 1) ?></span>
+                    <span class="font-semibold text-gray-900"><?= number_format((float)$product['rating'], 1) ?></span>
                     <span class="text-gray-500">(<?= $product['totalReviews'] ?> ulasan)</span>
                 </div>
             </div>
@@ -315,6 +465,20 @@ $waLink = "https://wa.me/{$product['sellerPhone']}?text={$waMessage}";
                                       placeholder="Ceritakan pengalaman Anda dengan produk ini..."><?= e($userReview['comment'] ?? '') ?></textarea>
                         </div>
                         
+                        <!-- Photo Upload -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Foto (opsional, maks. 2)</label>
+                            <div class="flex items-center gap-3">
+                                <label class="flex items-center gap-2 px-4 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl cursor-pointer transition-colors">
+                                    <i data-lucide="camera" class="w-5 h-5"></i>
+                                    <span>Pilih Foto</span>
+                                    <input type="file" name="images[]" id="reviewImages" accept="image/*" multiple class="hidden" onchange="previewReviewImages(this)">
+                                </label>
+                                <span class="text-sm text-gray-500" id="imageCount">Belum ada foto</span>
+                            </div>
+                            <div id="imagePreviewContainer" class="flex gap-3 mt-3 flex-wrap"></div>
+                        </div>
+                        
                         <button type="submit" id="submitReviewBtn"
                                 class="px-6 py-2.5 bg-primary-600 hover:bg-primary-700 text-white font-semibold rounded-xl transition-all">
                             <?= $userReview ? 'Perbarui Ulasan' : 'Kirim Ulasan' ?>
@@ -351,7 +515,7 @@ $waLink = "https://wa.me/{$product['sellerPhone']}?text={$waMessage}";
                                 <div class="flex-1">
                                     <div class="flex items-center justify-between mb-1">
                                         <h4 class="font-semibold text-gray-900"><?= e($review['fullName']) ?></h4>
-                                        <span class="text-sm text-gray-500"><?= timeAgo($review['createdAt']) ?></span>
+                                        <span class="text-sm text-gray-500"><?= tanggal($review['createdAt'], 'datetime') ?></span>
                                     </div>
                                     <div class="flex items-center gap-1 mb-2">
                                         <?php for ($i = 1; $i <= 5; $i++): ?>
@@ -360,6 +524,18 @@ $waLink = "https://wa.me/{$product['sellerPhone']}?text={$waMessage}";
                                     </div>
                                     <?php if ($review['comment']): ?>
                                         <p class="text-gray-600"><?= nl2br(e($review['comment'])) ?></p>
+                                    <?php endif; ?>
+                                    <?php 
+                                    $reviewImages = !empty($review['images']) ? json_decode($review['images'], true) : [];
+                                    if (!empty($reviewImages)): 
+                                    ?>
+                                        <div class="flex gap-2 mt-3">
+                                            <?php foreach ($reviewImages as $img): ?>
+                                                <a href="<?= uploadUrl($img) ?>" target="_blank" class="block">
+                                                    <img src="<?= uploadUrl($img) ?>" class="w-20 h-20 object-cover rounded-lg border border-gray-200 hover:border-primary-500 transition-colors">
+                                                </a>
+                                            <?php endforeach; ?>
+                                        </div>
                                     <?php endif; ?>
                                 </div>
                             </div>
@@ -403,20 +579,58 @@ $waLink = "https://wa.me/{$product['sellerPhone']}?text={$waMessage}";
     <script>
         lucide.createIcons();
         
+        // Toast Notification System
+        function showToast(type, title, message, duration = 4000) {
+            const container = document.getElementById('toastContainer');
+            
+            const icons = {
+                success: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>`,
+                error: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>`
+            };
+            
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+            toast.innerHTML = `
+                <div class="toast-icon">${icons[type]}</div>
+                <div class="toast-content">
+                    <div class="toast-title">${title}</div>
+                    ${message ? `<div class="toast-message">${message}</div>` : ''}
+                </div>
+                <button class="toast-close" onclick="dismissToast(this.parentElement)">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
+                <div class="toast-progress"></div>
+            `;
+            
+            container.appendChild(toast);
+            
+            // Auto dismiss
+            setTimeout(() => dismissToast(toast), duration);
+        }
+        
+        function dismissToast(toast) {
+            if (!toast || toast.classList.contains('leaving')) return;
+            toast.classList.add('leaving');
+            setTimeout(() => toast.remove(), 400);
+        }
+        
         // Star rating interaction
         function setRating(rating) {
             document.getElementById('ratingInput').value = rating;
-            const stars = document.querySelectorAll('.rating-star i');
-            stars.forEach((star, index) => {
+            const buttons = document.querySelectorAll('.rating-star');
+            
+            buttons.forEach((btn, index) => {
+                const icon = btn.querySelector('svg') || btn.querySelector('i');
+                if (!icon) return;
+
                 if (index < rating) {
-                    star.classList.remove('text-gray-300', 'hover:text-accent-400');
-                    star.classList.add('fill-accent-500', 'text-accent-500');
+                    icon.classList.remove('text-gray-300', 'hover:text-accent-400');
+                    icon.classList.add('fill-accent-500', 'text-accent-500');
                 } else {
-                    star.classList.remove('fill-accent-500', 'text-accent-500');
-                    star.classList.add('text-gray-300', 'hover:text-accent-400');
+                    icon.classList.remove('fill-accent-500', 'text-accent-500');
+                    icon.classList.add('text-gray-300', 'hover:text-accent-400');
                 }
             });
-            lucide.createIcons();
         }
         
         // Review form submission
@@ -429,7 +643,7 @@ $waLink = "https://wa.me/{$product['sellerPhone']}?text={$waMessage}";
                 const rating = formData.get('rating');
                 
                 if (!rating) {
-                    alert('Silakan pilih rating terlebih dahulu');
+                    showToast('error', 'Rating Diperlukan', 'Silakan pilih bintang rating terlebih dahulu');
                     return;
                 }
                 
@@ -440,28 +654,82 @@ $waLink = "https://wa.me/{$product['sellerPhone']}?text={$waMessage}";
                 try {
                     const response = await fetch('<?= url('api/reviews') ?>', {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                        body: new URLSearchParams(formData)
+                        body: formData,
+                        credentials: 'same-origin'
                     });
                     
-                    const result = await response.json();
+                    const responseText = await response.text();
+                    console.log('API Response:', response.status, responseText);
+                    
+                    let result;
+                    try {
+                        result = JSON.parse(responseText);
+                    } catch (parseError) {
+                        showToast('error', 'Server Error', responseText.substring(0, 100));
+                        return;
+                    }
                     
                     if (result.success) {
-                        alert('Ulasan berhasil disimpan!');
-                        location.reload();
+                        showToast('success', 'Berhasil!', 'Ulasan Anda telah disimpan. Terima kasih!');
+                        setTimeout(() => location.reload(), 2000);
                     } else {
-                        alert(result.message || 'Terjadi kesalahan');
+                        showToast('error', 'Gagal', result.message || 'Terjadi kesalahan');
                     }
                 } catch (error) {
-                    alert('Gagal mengirim ulasan. Coba lagi.');
+                    console.error('Fetch error:', error);
+                    showToast('error', 'Koneksi Bermasalah', 'Gagal mengirim ulasan. Coba lagi.');
                 } finally {
                     btn.disabled = false;
                     btn.textContent = 'Kirim Ulasan';
                 }
             });
         }
-                }
+        
+        // Preview review images
+        function previewReviewImages(input) {
+            const container = document.getElementById('imagePreviewContainer');
+            const countSpan = document.getElementById('imageCount');
+            container.innerHTML = '';
+            
+            const files = Array.from(input.files).slice(0, 2); // Max 2 files
+            
+            if (files.length === 0) {
+                countSpan.textContent = 'Belum ada foto';
+                return;
+            }
+            
+            countSpan.textContent = `${files.length} foto dipilih`;
+            
+            files.forEach((file, index) => {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const wrapper = document.createElement('div');
+                    wrapper.className = 'relative';
+                    wrapper.innerHTML = `
+                        <img src="${e.target.result}" class="w-20 h-20 object-cover rounded-xl border-2 border-gray-200">
+                        <button type="button" onclick="removePreviewImage(${index})" class="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center text-xs hover:bg-red-600">×</button>
+                    `;
+                    container.appendChild(wrapper);
+                };
+                reader.readAsDataURL(file);
             });
+            
+            // Limit to 2 files
+            if (input.files.length > 2) {
+                const dt = new DataTransfer();
+                files.forEach(f => dt.items.add(f));
+                input.files = dt.files;
+            }
+        }
+        
+        function removePreviewImage(index) {
+            const input = document.getElementById('reviewImages');
+            const dt = new DataTransfer();
+            Array.from(input.files).forEach((file, i) => {
+                if (i !== index) dt.items.add(file);
+            });
+            input.files = dt.files;
+            previewReviewImages(input);
         }
         
         // Gallery Interaction

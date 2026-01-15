@@ -211,17 +211,17 @@ $pageTitle = 'Semua Produk - WHFood';
                             
                             <div class="flex items-center gap-1 mt-2">
                                 <i data-lucide="star" class="w-4 h-4 text-accent-500 fill-accent-500"></i>
-                                <span class="text-sm font-medium"><?= number_format($product['rating'], 1) ?></span>
+                                <span class="text-sm font-medium"><?= number_format((float)$product['rating'], 1) ?></span>
                                 <span class="text-xs text-gray-400">(<?= $product['totalSold'] ?> terjual)</span>
                             </div>
                             
                             <div class="mt-3 flex items-end justify-between">
                                 <div>
                                     <?php if ($product['discountPrice']): ?>
-                                        <span class="text-xs text-gray-400 line-through"><?= rupiah($product['price']) ?></span>
-                                        <div class="text-lg font-bold text-primary-600"><?= rupiah($product['discountPrice']) ?></div>
+                                        <span class="text-xs text-gray-400 line-through"><?= rupiah((float)$product['price']) ?></span>
+                                        <div class="text-lg font-bold text-primary-600"><?= rupiah((float)$product['discountPrice']) ?></div>
                                     <?php else: ?>
-                                        <div class="text-lg font-bold text-primary-600"><?= rupiah($product['price']) ?></div>
+                                        <div class="text-lg font-bold text-primary-600"><?= rupiah((float)$product['price']) ?></div>
                                     <?php endif; ?>
                                 </div>
                                 

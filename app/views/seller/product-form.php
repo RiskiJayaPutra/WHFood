@@ -227,7 +227,7 @@ $categories = [
     
     <?php require VIEWS_PATH . '/components/seller-sidebar.php'; ?>
     
-    <main class="ml-64 p-8">
+    <main class="transition-all duration-300 md:ml-64 p-4 md:p-8">
         <!-- Header -->
         <div class="flex items-center gap-4 mb-8">
             <a href="<?= url('seller/produk') ?>" class="p-2 hover:bg-gray-100 rounded-lg transition-colors group">
@@ -279,7 +279,7 @@ $categories = [
                                     </div>
                                     <input type="text" id="name" name="name" required
                                            value="<?= e(old('name', $product['name'] ?? '')) ?>"
-                                           class="w-full pl-12 pr-4 py-3 rounded-xl border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-100 outline-none transition-all placeholder:text-gray-300 shadow-sm"
+                                           class="w-full pl-12 pr-4 py-3 rounded-xl border border-gray-200 text-gray-900 focus:border-primary-500 focus:ring-2 focus:ring-primary-100 outline-none transition-all placeholder:text-gray-300 shadow-sm"
                                            placeholder="Contoh: Nasi Goreng Spesial">
                                 </div>
                             </div>
@@ -294,7 +294,7 @@ $categories = [
                                         <i data-lucide="align-left" class="w-5 h-5 text-gray-400"></i>
                                     </div>
                                     <textarea id="description" name="description" rows="4"
-                                              class="w-full pl-12 pr-4 py-3 rounded-xl border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-100 outline-none transition-all resize-none placeholder:text-gray-300 shadow-sm"
+                                              class="w-full pl-12 pr-4 py-3 rounded-xl border border-gray-200 text-gray-900 focus:border-primary-500 focus:ring-2 focus:ring-primary-100 outline-none transition-all resize-none placeholder:text-gray-300 shadow-sm"
                                               placeholder="Jelaskan rasa, bahan utama, dan keunggulan produk Anda..."><?= e(old('description', $product['description'] ?? '')) ?></textarea>
                                 </div>
                             </div>
@@ -309,7 +309,7 @@ $categories = [
                                         <i data-lucide="tag" class="w-5 h-5 text-gray-400"></i>
                                     </div>
                                     <select id="category" name="category" required
-                                            class="w-full pl-12 pr-4 py-3 rounded-xl border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-100 outline-none transition-all bg-white appearance-none cursor-pointer shadow-sm">
+                                            class="w-full pl-12 pr-4 py-3 rounded-xl border border-gray-200 text-gray-900 focus:border-primary-500 focus:ring-2 focus:ring-primary-100 outline-none transition-all bg-white appearance-none cursor-pointer shadow-sm">
                                         <option value="">Pilih Kategori Produk</option>
                                         <?php foreach ($categories as $value => $label): ?>
                                             <option value="<?= $value ?>" <?= (old('category', $product['category'] ?? '') === $value) ? 'selected' : '' ?>>
@@ -349,7 +349,7 @@ $categories = [
                                     </div>
                                     <input type="number" id="price" name="price" required min="0" step="100"
                                            value="<?= e(old('price', $product['price'] ?? '')) ?>"
-                                           class="w-full pl-12 pr-4 py-3 rounded-xl border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-100 outline-none transition-all placeholder:text-gray-300 shadow-sm"
+                                           class="w-full pl-12 pr-4 py-3 rounded-xl border border-gray-200 text-gray-900 focus:border-primary-500 focus:ring-2 focus:ring-primary-100 outline-none transition-all placeholder:text-gray-300 shadow-sm"
                                            placeholder="0">
                                 </div>
                             </div>
@@ -365,7 +365,7 @@ $categories = [
                                     </div>
                                     <input type="number" id="discountPrice" name="discountPrice" min="0" step="100"
                                            value="<?= e(old('discountPrice', $product['discountPrice'] ?? '')) ?>"
-                                           class="w-full pl-12 pr-4 py-3 rounded-xl border border-gray-200 focus:border-accent-500 focus:ring-2 focus:ring-accent-100 outline-none transition-all placeholder:text-gray-300 shadow-sm"
+                                           class="w-full pl-12 pr-4 py-3 rounded-xl border border-gray-200 text-gray-900 focus:border-accent-500 focus:ring-2 focus:ring-accent-100 outline-none transition-all placeholder:text-gray-300 shadow-sm"
                                            placeholder="0">
                                 </div>
                                 <p class="text-xs text-gray-500 mt-1">Harga ini akan dicoret (diskon)</p>
@@ -382,7 +382,7 @@ $categories = [
                                     </div>
                                     <input type="number" id="stock" name="stock" min="0"
                                            value="<?= e(old('stock', $product['stock'] ?? 0)) ?>"
-                                           class="w-full pl-12 pr-4 py-3 rounded-xl border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-100 outline-none transition-all placeholder:text-gray-300 shadow-sm"
+                                           class="w-full pl-12 pr-4 py-3 rounded-xl border border-gray-200 text-gray-900 focus:border-primary-500 focus:ring-2 focus:ring-primary-100 outline-none transition-all placeholder:text-gray-300 shadow-sm"
                                            placeholder="0">
                                 </div>
                             </div>
@@ -398,14 +398,14 @@ $categories = [
                                     </div>
                                     <input type="text" id="unit" name="unit" list="unit-suggestions"
                                            value="<?= e(old('unit', $product['unit'] ?? 'porsi')) ?>"
-                                           class="w-full pl-12 pr-4 py-3 rounded-xl border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-100 outline-none transition-all placeholder:text-gray-300 shadow-sm"
+                                           class="w-full pl-12 pr-4 py-3 rounded-xl border border-gray-200 text-gray-900 focus:border-primary-500 focus:ring-2 focus:ring-primary-100 outline-none transition-all placeholder:text-gray-300 shadow-sm"
                                            placeholder="porsi">
                                     <datalist id="unit-suggestions">
-                                        <option value="porsi text-gray-600">
-                                        <option value="pcs text-gray-600">
-                                        <option value="box text-gray-600">
-                                        <option value="kg text-gray-600">
-                                        <option value="gram text-gray-600">
+                                        <option value="porsi">
+                                        <option value="pcs">
+                                        <option value="box">
+                                        <option value="kg">
+                                        <option value="gram">
                                     </datalist>
                                 </div>
                             </div>
@@ -436,7 +436,7 @@ $categories = [
                                     </div>
                                     <input type="number" id="weight" name="weight" min="0"
                                            value="<?= e(old('weight', $product['weight'] ?? '')) ?>"
-                                           class="w-full pl-12 pr-4 py-3 rounded-xl border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-100 outline-none transition-all placeholder:text-gray-300 shadow-sm"
+                                           class="w-full pl-12 pr-4 py-3 rounded-xl border border-gray-200 text-gray-900 focus:border-primary-500 focus:ring-2 focus:ring-primary-100 outline-none transition-all placeholder:text-gray-300 shadow-sm"
                                            placeholder="500">
                                 </div>
                             </div>
@@ -452,7 +452,7 @@ $categories = [
                                     </div>
                                     <input type="number" id="preparationTime" name="preparationTime" min="0"
                                            value="<?= e(old('preparationTime', $product['preparationTime'] ?? '')) ?>"
-                                           class="w-full pl-12 pr-4 py-3 rounded-xl border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-100 outline-none transition-all placeholder:text-gray-300 shadow-sm"
+                                           class="w-full pl-12 pr-4 py-3 rounded-xl border border-gray-200 text-gray-900 focus:border-primary-500 focus:ring-2 focus:ring-primary-100 outline-none transition-all placeholder:text-gray-300 shadow-sm"
                                            placeholder="15">
                                 </div>
                             </div>
@@ -474,7 +474,7 @@ $categories = [
                         
                         <div class="relative">
                             <select id="status" name="status"
-                                    class="w-full px-4 py-3 pl-10 rounded-xl border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-100 outline-none transition-all bg-white appearance-none cursor-pointer shadow-sm">
+                                    class="w-full px-4 py-3 pl-10 rounded-xl border border-gray-200 text-gray-900 focus:border-primary-500 focus:ring-2 focus:ring-primary-100 outline-none transition-all bg-white appearance-none cursor-pointer shadow-sm">
                                 <option value="active" <?= (old('status', $product['status'] ?? 'active') === 'active') ? 'selected' : '' ?>>Aktif (Tampil)</option>
                                 <option value="inactive" <?= (old('status', $product['status'] ?? '') === 'inactive') ? 'selected' : '' ?>>Nonaktif (Sembunyi)</option>
                             </select>

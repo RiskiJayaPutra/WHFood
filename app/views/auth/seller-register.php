@@ -32,9 +32,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         'regency' => input('regency'),
         'latitude' => input('latitude'),
         'longitude' => input('longitude'),
-        'bankName' => input('bankName'),
-        'bankAccountNumber' => input('bankAccountNumber'),
-        'bankAccountName' => input('bankAccountName'),
         'nik' => input('nik'),
         'ownerName' => input('ownerName')
     ];
@@ -450,48 +447,7 @@ $pageTitle = 'Daftar Sebagai Penjual - WHFood';
                         </div>
                     </div>
                     
-                    <hr class="border-gray-200 mb-8">
-                    
-                    <!-- Section 4: Bank Information -->
-                    <div>
-                        <h3 class="text-lg font-semibold text-gray-900 mb-6 flex items-center gap-2">
-                            <span class="w-8 h-8 rounded-full bg-primary-100 text-primary-700 flex items-center justify-center text-sm font-bold">5</span>
-                            Informasi Pembayaran
-                            <span class="text-xs font-normal text-gray-500">(Opsional)</span>
-                        </h3>
-                        
-                        <div class="grid md:grid-cols-3 gap-4">
-                            <div>
-                                <label for="bankName" class="block text-sm font-medium text-gray-700 mb-2">Nama Bank</label>
-                                <select id="bankName" name="bankName"
-                                        class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary-500 focus:outline-none input-focus-ring transition-all bg-white">
-                                    <option value="">Pilih Bank</option>
-                                    <option value="BCA">BCA</option>
-                                    <option value="BRI">BRI</option>
-                                    <option value="BNI">BNI</option>
-                                    <option value="Mandiri">Mandiri</option>
-                                    <option value="BSI">BSI</option>
-                                    <option value="DANA">DANA</option>
-                                    <option value="OVO">OVO</option>
-                                    <option value="GoPay">GoPay</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label for="bankAccountNumber" class="block text-sm font-medium text-gray-700 mb-2">Nomor Rekening</label>
-                                <input type="text" id="bankAccountNumber" name="bankAccountNumber"
-                                       class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary-500 focus:outline-none input-focus-ring transition-all"
-                                       placeholder="Nomor rekening">
-                            </div>
-                            <div>
-                                <label for="bankAccountName" class="block text-sm font-medium text-gray-700 mb-2">Nama Pemilik</label>
-                                <input type="text" id="bankAccountName" name="bankAccountName"
-                                       class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary-500 focus:outline-none input-focus-ring transition-all"
-                                       placeholder="Sesuai buku rekening">
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <hr class="border-gray-200 my-8">
+                     <hr class="border-gray-200 my-8">
                     
                     <!-- Terms & Submit -->
                     <div class="space-y-6">
@@ -500,8 +456,8 @@ $pageTitle = 'Daftar Sebagai Penjual - WHFood';
                             <input type="checkbox" id="terms" name="terms" required
                                    class="mt-1 w-4 h-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500">
                             <label for="terms" class="text-sm text-gray-600">
-                                Saya setuju dengan <a href="#" class="text-primary-600 hover:underline">Syarat & Ketentuan</a>
-                                dan <a href="#" class="text-primary-600 hover:underline">Kebijakan Privasi</a>
+                                Saya setuju dengan <a href="<?= url('syarat-ketentuan') ?>" target="_blank" class="text-primary-600 hover:underline">Syarat & Ketentuan</a>
+                                dan <a href="<?= url('kebijakan-privasi') ?>" target="_blank" class="text-primary-600 hover:underline">Kebijakan Privasi</a>
                             </label>
                         </div>
                         

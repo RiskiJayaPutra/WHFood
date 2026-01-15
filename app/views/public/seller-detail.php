@@ -9,7 +9,7 @@ if (!$sellerSlug) {
 
 $db = Database::getInstance();
 
-// Get seller
+
 $seller = $db->selectOne("
     SELECT sp.*, u.phoneNumber, u.fullName as ownerName, u.email
     FROM seller_profiles sp
@@ -23,7 +23,7 @@ if (!$seller) {
     exit;
 }
 
-// Get seller products
+
 $products = $db->select("
     SELECT * FROM products 
     WHERE sellerId = ? AND status = 'active' AND isAvailable = 1
@@ -139,7 +139,7 @@ $pageTitle = $seller['storeName'] . ' - WHFood';
                     <div class="flex flex-wrap gap-6 mb-4">
                         <div class="flex items-center gap-2">
                             <i data-lucide="star" class="w-5 h-5 text-accent-500 fill-accent-500"></i>
-                            <span class="font-semibold text-lg"><?= number_format($seller['rating'], 1) ?></span>
+                            <span class="font-semibold text-lg"><?= number_format((float)$seller['rating'], 1) ?></span>
                             <span class="text-gray-500">(<?= $seller['totalReviews'] ?> ulasan)</span>
                         </div>
                         <div class="flex items-center gap-2 text-gray-500">
@@ -152,10 +152,16 @@ $pageTitle = $seller['storeName'] . ' - WHFood';
                         </div>
                     </div>
                     
-                    <!-- Location -->
-                    <div class="flex items-center gap-2 text-gray-500">
-                        <i data-lucide="map-pin" class="w-5 h-5"></i>
-                        <span><?= e($seller['address']) ?></span>
+                    <!-- Location & Owner -->
+                    <div class="space-y-2 mt-4 pt-4 border-t border-gray-100">
+                        <div class="flex items-center gap-2 text-gray-500">
+                            <i data-lucide="map-pin" class="w-5 h-5 text-gray-400"></i>
+                            <span><?= e($seller['address']) ?></span>
+                        </div>
+                        <div class="flex items-center gap-2 text-gray-500">
+                            <i data-lucide="user" class="w-5 h-5 text-gray-400"></i>
+                            <span>Pemilik: <span class="font-medium text-gray-900"><?= e($seller['ownerName']) ?></span></span>
+                        </div>
                     </div>
                 </div>
                 
@@ -178,7 +184,18 @@ $pageTitle = $seller['storeName'] . ' - WHFood';
         <!-- Map -->
         <?php if ($seller['latitude'] && $seller['longitude']): ?>
             <div class="mt-8 bg-white rounded-2xl shadow-sm overflow-hidden">
-                <div id="storeMap" class="w-full h-64"></div>
+                <a href="https://www.google.com/maps/dir/?api=1&destination=<?= $seller['latitude'] ?>,<?= $seller['longitude'] ?>" 
+                   target="_blank" 
+                   rel="noopener noreferrer"
+                   class="block relative group">
+                    <div id="storeMap" class="w-full h-64"></div>
+                    <div class="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
+                        <div class="opacity-0 group-hover:opacity-100 transition-opacity bg-white/90 backdrop-blur px-4 py-2 rounded-xl flex items-center gap-2 shadow-lg">
+                            <i data-lucide="navigation" class="w-5 h-5 text-primary-600"></i>
+                            <span class="font-semibold text-gray-900">Buka di Google Maps</span>
+                        </div>
+                    </div>
+                </a>
             </div>
         <?php endif; ?>
         
@@ -205,15 +222,15 @@ $pageTitle = $seller['storeName'] . ' - WHFood';
                                 <h3 class="font-semibold text-gray-900 line-clamp-2 group-hover:text-primary-600"><?= e($product['name']) ?></h3>
                                 <div class="flex items-center gap-1 mt-2">
                                     <i data-lucide="star" class="w-4 h-4 text-accent-500 fill-accent-500"></i>
-                                    <span class="text-sm"><?= number_format($product['rating'], 1) ?></span>
+                                    <span class="text-sm"><?= number_format((float)$product['rating'], 1) ?></span>
                                     <span class="text-xs text-gray-400">(<?= $product['totalSold'] ?> terjual)</span>
                                 </div>
                                 <div class="mt-2">
                                     <?php if ($product['discountPrice']): ?>
-                                        <span class="text-xs text-gray-400 line-through"><?= rupiah($product['price']) ?></span>
-                                        <div class="text-lg font-bold text-primary-600"><?= rupiah($product['discountPrice']) ?></div>
+                                        <span class="text-xs text-gray-400 line-through"><?= rupiah((float)$product['price']) ?></span>
+                                        <div class="text-lg font-bold text-primary-600"><?= rupiah((float)$product['discountPrice']) ?></div>
                                     <?php else: ?>
-                                        <div class="text-lg font-bold text-primary-600"><?= rupiah($product['price']) ?></div>
+                                        <div class="text-lg font-bold text-primary-600"><?= rupiah((float)$product['price']) ?></div>
                                     <?php endif; ?>
                                 </div>
                             </div>
