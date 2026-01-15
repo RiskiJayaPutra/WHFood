@@ -79,6 +79,12 @@ $currentUser = user();
             <span class="font-medium">Profil Toko</span>
         </a>
         
+        <a href="<?= url('seller/pembayaran') ?>" 
+           class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all <?= $currentPage === 'pembayaran' ? 'bg-primary-50 text-primary-700' : 'text-gray-600 hover:bg-gray-50' ?>">
+            <i data-lucide="wallet" class="w-5 h-5"></i>
+            <span class="font-medium">Metode Pembayaran</span>
+        </a>
+        
         <a href="<?= url('/') ?>" 
            class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-gray-600 hover:bg-gray-50 transition-all">
             <i data-lucide="globe" class="w-5 h-5"></i>
